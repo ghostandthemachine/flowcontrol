@@ -16,6 +16,8 @@ public interface IUGenInfo {
 
     int numOutputs();
 
+    int numInputs();
+
     IUGenParameter getParameters();
 
     String getDoc();

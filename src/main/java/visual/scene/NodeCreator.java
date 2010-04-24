@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package data;
+package visual.scene;
 
 import dataScene.DataScene;
 import java.util.ArrayList;
@@ -10,33 +10,34 @@ import atom.Atom;
 import atom.AtomFloat;
 import atom.AtomInt;
 import atom.AtomString;
+import data.DataNode;
 import data.objects.Add;
 import data.objects.DataFloat;
 import data.objects.IUGenDataObject;
 import data.objects.Metro;
 import data.objects.Print;
 import data.objects.Toggle;
+import overtoneinterface.IUGen;
 import visual.node.VisualNode;
 import overtoneinterface.IUGenInfo;
-import visual.scene.VisualScene;
 
 /**
  *
  * @author Jon
  */
-public class DataNodeCreator {
+public class NodeCreator {
 
     DataScene dataScene;
     VisualNode parent;
     VisualScene modelScene;
 
-    public DataNodeCreator(DataScene dScene, VisualNode node, VisualScene scene) {
+    public NodeCreator(DataScene dScene, VisualNode node, VisualScene scene) {
         parent = node;
         dataScene = dScene;
         modelScene = scene;
     }
 
-    public DataNode createDataNode(IUGenInfo ugen, VisualNode visNode) {
+    public DataNode createDataNode(IUGen ugen, VisualNode visNode) {
         DataNode node = new IUGenDataObject(ugen.getName(), visNode, dataScene, ugen.getInputs(), ugen.numOutputs(), ugen.getRate());
         return node;
     }

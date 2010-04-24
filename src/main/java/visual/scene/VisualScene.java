@@ -13,11 +13,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import dataScene.DataScene;
-import data.DataNodeCreator;
 import data.objects.DataFloat;
 import data.objects.IUGenDataObject;
 import data.objects.Metro;
 import data.objects.Print;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import visual.UINodes.FloatDisplay;
@@ -44,6 +44,9 @@ import org.netbeans.api.visual.widget.Widget;
 import org.netbeans.api.visual.widget.general.IconNodeWidget;
 import overtoneinterface.IUGen;
 import overtoneinterface.IUGenInfo;
+import overtoneinterface.IUGenInput;
+import overtoneinterface.TestUGen;
+import overtoneinterface.TestUGenInput;
 
 /**
  *
@@ -69,7 +72,7 @@ public class VisualScene extends GraphScene {
     public static final String CONNECTION_EDIT_TOOL = "connectionEditTool";
     public static final String USE = "alignMode";
     public static final String EDGE_CONTROL_MODE = "edgeControlMode";
-    private DataNodeCreator dataNodeCreator;
+    private NodeCreator dataNodeCreator;
     private DataScene dataScene = new DataScene(this);
     private boolean over = false;
     private double mouseX;
@@ -128,6 +131,18 @@ public class VisualScene extends GraphScene {
 //        this.connect(node3, 0, node1, 0);
 //        this.connect(node1, 0, node5, 0);
 
+
+        TestUGen[] ugen = new TestUGen[10];
+        for (int i = 0; i < 9; i++) {
+            ugen[i] = new TestUGen("test", 500, 2, 2);
+            if (i != 0) {
+                //create a new UGen connection difinition by just adding a new source ugen and port id
+                //this example just connects this ugen to the last one if it isn't the first one, then
+                //connects to port 0
+                ugen[i].addUGenInput(new TestUGenInput(ugen[i - 1], 0));
+            }
+        }
+        setUGens(ugen);
     }
 
     public boolean isMouseDragged() {
@@ -370,7 +385,7 @@ public class VisualScene extends GraphScene {
         addEdge(connection);
     }
 
-    public void setDataScene(DataNodeCreator d) {
+    public void setDataScene(NodeCreator d) {
         dataNodeCreator = d;
     }
 
@@ -648,33 +663,48 @@ public class VisualScene extends GraphScene {
      *
      * @param ugens - an array of IUGenInfo objects sent from overtone/supercollider
      */
-    private void setUGens(List<IUGenInfo> ugens) {
+    private void setUGens(IUGen[] ugens) {
 
-        VisualNode[] reffNodes = new VisualNode[ugens.size()];
+      //  VisualNode[] reffNodes = new VisualNode[ugens.length];
+        Hashtable newNodes = new Hashtable();
         /*
          * create the nodes before connecting them
          */
-        for (int i = 0; i < ugens.size(); i++) {
-            IUGen ugen = (IUGen) ugens.get(i);
-            VisualNode visualNode = new VisualNode(this, dataScene);
-            DataNode dataNode = new IUGenDataObject(ugen.getName(), visualNode, dataScene, ugen.getInputs(), ugen.numOutputs(), ugen.getRate());
+        for (int i = 0; i < ugens.length - 1; i++) {
+            IUGen ugen = ugens[i];
+            VisualNode visualNode = new VisualNode(this, dataScene, ugen);
 
             int tx = 50;
             int ty = i * 40;
             visualNode.setPreferredLocation(new Point(tx, ty));
-            visualNode.setDataNode(dataNode);
 
-            reffNodes[i] = visualNode;
+          //  reffNodes[i] = visualNode;
+            newNodes.put(ugen, visualNode);
+
             this.createNode(visualNode);
         }
 
         /*
          * connect the nodes based on the IUGenInfo object
          */
-        for(int i = 0; i < ugens.size(); i++) {
-            VisualNode node = reffNodes[i];
-            for(int j = 0; j < ugens.size() - 1; j++){
-                
+        for (int i = 0; i < ugens.length - 1; i++) {
+            VisualNode node = (VisualNode) newNodes.get(ugens[i]);
+            IUGenInput[] nodeInputs = ugens[i].getInputs();
+
+            for (int j = 0; j < nodeInputs.length - 1; j++) {
+                IUGenInput input = nodeInputs[j];
+                VisualNode sourceNode = (VisualNode) newNodes.get(input.getUGen());
+                int sourcePortId = input.getPortNumber();
+                System.out.println(sourceNode + "   " + sourcePortId + "   " +  node + "  0");
+
+                ///////////
+                ////
+                int targetPortId = 0;
+                ////
+                //////////
+
+
+                this.connect(sourceNode, sourcePortId, node, targetPortId);
             }
         }
 

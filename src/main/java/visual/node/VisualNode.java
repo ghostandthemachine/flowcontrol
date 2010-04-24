@@ -11,8 +11,7 @@ import java.util.HashSet;
 import atom.AtomFloat;
 import dataScene.DataScene;
 import data.DataNode;
-import data.DataNodeCreator;
-import java.awt.Dimension;
+import visual.scene.NodeCreator;
 import visual.node.PortGroup.PortType;
 import visual.scene.VisualScene;
 import org.netbeans.api.visual.action.ActionFactory;
@@ -31,6 +30,7 @@ import org.netbeans.api.visual.laf.LookFeel;
 import org.netbeans.api.visual.widget.ConnectionWidget;
 import org.netbeans.api.visual.widget.LabelWidget;
 import org.netbeans.api.visual.widget.Widget;
+import overtoneinterface.IUGen;
 import overtoneinterface.IUGenInfo;
 
 /**
@@ -53,7 +53,7 @@ public class VisualNode extends Widget {
     NodeMenu menu;
     DataScene dataScene;
     DataNode dataNode;
-    DataNodeCreator dataNodeCreator;
+    NodeCreator dataNodeCreator;
     protected HashSet connections = new HashSet();
     protected float value = 0;
     protected double mouseX;
@@ -72,13 +72,70 @@ public class VisualNode extends Widget {
         parentScene = scene;
         dataScene = dScene;
         type = VisualNode.DATA;
-        dataNodeCreator = new DataNodeCreator(dScene, this, parentScene);
+        dataNodeCreator = new NodeCreator(dScene, this, parentScene);
         dataNode = new DataNode("     ", this, dataScene, 1, 1);
         editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
 
-        Border border = BorderFactory.createRoundedBorder(borderRadius, borderRadius, 5, 2, Color.white, Color.black);
+        createLabelWidget(scene);
+        createInputPorts(scene);
+        createOutputPorts(scene);
 
-        labelWidget = new LabelWidget(scene);
+        scene.addNode(this);
+    }
+
+    public VisualNode(VisualScene scene, DataScene dScene, String label) {
+        super(scene);
+        parentScene = scene;
+        dataScene = dScene;
+        type = UI;
+        dataNodeCreator = new NodeCreator(dScene, this, parentScene);
+        dataNode = dataNodeCreator.createDataNode(label, this);
+        editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
+
+        createLabelWidget(scene);
+        createInputPorts(scene);
+        createOutputPorts(scene);
+
+        scene.addNode(this);
+
+        //after construction, reset the label to be current with the dataNode
+        this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
+    }
+
+    public VisualNode(VisualScene scene, DataScene dScene, IUGen ugen) {
+        super(scene);
+        parentScene = scene;
+        dataScene = dScene;
+        type = UI;
+        dataNodeCreator = new NodeCreator(dScene, this, parentScene);
+        dataNode = dataNodeCreator.createDataNode(ugen, this);
+        editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
+
+        createLabelWidget(scene);
+        createInputPorts(scene);
+        createOutputPorts(scene);
+
+        scene.addNode(this);
+
+        //after construction, reset the label to be current with the dataNode
+        this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
+    }
+
+    private void createOutputPorts(VisualScene scene) {
+        outputPorts = new PortGroup(scene, this, 1, PortType.OUTPUT);
+        outputPorts.setPreferredLocation(new Point(0, 0));
+        addChild(outputPorts);
+    }
+
+    private void createInputPorts(VisualScene scene) {
+        inputPorts = new PortGroup(scene, this, 1, PortType.INPUT);
+        inputPorts.setPreferredLocation(new Point(0, -22));
+        addChild(inputPorts);
+    }
+
+    private void createLabelWidget(VisualScene scene) {
+        Border border = BorderFactory.createRoundedBorder(borderRadius, borderRadius, 5, 2, Color.white, Color.black);
+        labelWidget = new LabelWidget(parentScene);
         labelWidget.setFont(scene.getDefaultFont().deriveFont(13.0f));
         labelWidget.getActions().addAction(editorAction);
         labelWidget.setOpaque(true);
@@ -87,50 +144,6 @@ public class VisualNode extends Widget {
         // labelWidget.setBorder(BorderFactory.createResizeBorder(5));
         // labelWidget.setBorder(BorderFactory.createResizeBorder(8, Color.BLACK, true));
         addChild(labelWidget);
-
-        inputPorts = new PortGroup(scene, this, 1, PortType.INPUT);
-        inputPorts.setPreferredLocation(new Point(0, -22));
-        addChild(inputPorts);
-
-        outputPorts = new PortGroup(scene, this, 1, PortType.OUTPUT);
-        outputPorts.setPreferredLocation(new Point(0, 0));
-        addChild(outputPorts);
-
-        scene.addNode(this);
-
-    }
-
-    public VisualNode(VisualScene scene, DataScene dScene, String label) {
-        super(scene);
-        parentScene = scene;
-        dataScene = dScene;
-        type = UI;
-        dataNodeCreator = new DataNodeCreator(dScene, this, parentScene);
-        dataNode = dataNodeCreator.createDataNode(label, this);
-        editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
-
-        Border border = BorderFactory.createRoundedBorder(borderRadius, borderRadius, 5, 2, Color.white, Color.black);
-
-        labelWidget = new LabelWidget(scene);
-        labelWidget.setFont(scene.getDefaultFont().deriveFont(13.0f));
-        labelWidget.getActions().addAction(editorAction);
-        labelWidget.setLabel("            ");
-        labelWidget.setBorder(border);
-        addChild(labelWidget);
-
-        inputPorts = new PortGroup(scene, this, 1, PortType.INPUT);
-        inputPorts.setPreferredLocation(new Point(0, -22));
-        addChild(inputPorts);
-
-        outputPorts = new PortGroup(scene, this, 1, PortType.OUTPUT);
-        outputPorts.setPreferredLocation(new Point(0, 0));
-        addChild(outputPorts);
-
-        scene.addNode(this);
-
-        //after construction, reset the label to be current with the dataNode
-        this.setLabel(dataNode.getTitle());
-        this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
     }
 
     public void removeLabelEditor() {
@@ -355,7 +368,6 @@ public class VisualNode extends Widget {
         outputPorts.removeHoverActions();
         System.out.println("hover model node off");
     }
-    
 
     private class LabelTextFieldEditor implements TextFieldInplaceEditor {
 

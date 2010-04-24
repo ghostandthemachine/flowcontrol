@@ -4,8 +4,6 @@
  */
 package overtoneinterface;
 
-import overtoneinterface.IUGenInput;
-
 /**
  *
  * @author Jon
@@ -18,5 +16,9 @@ public interface IUGen {
 
     int numOutputs();
 
+    int numInputs();
+
     IUGenInput[] getInputs();
+
+    public TestUGenParameter getParameters();
 }

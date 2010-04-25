@@ -22,7 +22,7 @@ public interface IUGenInfo {
 
     String getDoc();
 
-    IUGenInput[] getInputs();
+    IUGenConnection[] getInputs();
 }
 
 

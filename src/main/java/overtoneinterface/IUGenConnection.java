@@ -8,9 +8,13 @@ package overtoneinterface;
  *
  * @author Jon
  */
-public interface IUGenInput {
+public interface IUGenConnection {
 
-    IUGen getUGen();
+    IUGen getTarget();
 
-    int getPortNumber();
+    int getTargetPortNumber();
+
+    IUGen getSource();
+
+    int getSourcePortNumber();
 }

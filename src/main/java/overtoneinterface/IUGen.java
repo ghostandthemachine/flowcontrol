@@ -18,7 +18,9 @@ public interface IUGen {
 
     int numInputs();
 
-    IUGenInput[] getInputs();
+    IUGenConnection[] getConnections();
+
+    int getNumConnections();
 
     public TestUGenParameter getParameters();
 }

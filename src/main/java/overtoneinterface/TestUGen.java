@@ -17,8 +17,8 @@ public class TestUGen implements IUGen {
     int nOutputs;
     int nInputs;
     TestUGenParameter params;
-    ArrayList<TestUGenInput> inputs = new ArrayList<TestUGenInput>();
-    TestUGenInfo info;
+    ArrayList<IUGenConnection> inputs = new ArrayList<IUGenConnection>();
+    IUGenInfo info;
     private float defaultValue = 0;
 
     public TestUGen(String name, int rate, int ins, int outs) {
@@ -29,14 +29,24 @@ public class TestUGen implements IUGen {
 
         params = new TestUGenParameter(name, defaultValue);
         info = new TestUGenInfo(this);
-        for (int i = 0; i < nInputs; i++) {
-            inputs.add(0, new TestUGenInput(this, i));
-        }
     }
 
-    public void addUGenInput(TestUGenInput input){
+    public TestUGen(String name, int rate, int ins, int outs, IUGenConnection[] inputs) {
+        this.name = name;
+        this.rate = rate;
+        this.nInputs = ins;
+        this.nOutputs = outs;
+
+        for ( int i = 0; i < inputs.length; i++) {
+            this.inputs.add( inputs[i]);
+        }
+
+        params = new TestUGenParameter(name, defaultValue);
+        info = new TestUGenInfo(this);
+    }
+
+    public void addUGenInput(TestUGenConnection input) {
         inputs.add(input);
-        nInputs++;
     }
 
     @Override
@@ -55,18 +65,23 @@ public class TestUGen implements IUGen {
     }
 
     @Override
-    public IUGenInput[] getInputs() {
-        IUGenInput[] array = new IUGenInput[inputs.size()];
+    public IUGenConnection[] getConnections() {
+        IUGenConnection[] array = new IUGenConnection[inputs.size()];
         inputs.toArray(array);
         return array;
     }
 
     @Override
-    public int numInputs() {
+    public int getNumConnections() {
         return inputs.size();
     }
 
-    public TestUGenInfo getInfo() {
+    @Override
+    public int numInputs() {
+        return nInputs;
+    }
+
+    public IUGenInfo getInfo() {
         return info;
     }
 

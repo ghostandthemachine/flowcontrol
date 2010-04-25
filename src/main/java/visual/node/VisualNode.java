@@ -27,6 +27,7 @@ import org.netbeans.api.visual.action.WidgetAction.WidgetMouseWheelEvent;
 import org.netbeans.api.visual.border.Border;
 import org.netbeans.api.visual.border.BorderFactory;
 import org.netbeans.api.visual.laf.LookFeel;
+import org.netbeans.api.visual.model.ObjectState;
 import org.netbeans.api.visual.widget.ConnectionWidget;
 import org.netbeans.api.visual.widget.LabelWidget;
 import org.netbeans.api.visual.widget.Widget;
@@ -119,6 +120,18 @@ public class VisualNode extends Widget {
 
         //after construction, reset the label to be current with the dataNode
         this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
+    }
+
+        /**
+     * Implements the widget-state specific look of the widget.
+     * @param previousState the previous state
+     * @param state the new state
+     */
+    @Override
+    public void notifyStateChanged (ObjectState previousState, ObjectState state) {
+        LookFeel lookFeel = getScene ().getLookFeel ();
+        labelWidget.setBorder (lookFeel.getBorder (state));
+        labelWidget.setForeground (lookFeel.getForeground (state));
     }
 
     private void createOutputPorts(VisualScene scene) {
@@ -366,7 +379,7 @@ public class VisualNode extends Widget {
 
     public void removeHoverActions() {
         outputPorts.removeHoverActions();
-        System.out.println("hover model node off");
+  //      System.out.println("hover model node off");
     }
 
     private class LabelTextFieldEditor implements TextFieldInplaceEditor {
@@ -477,7 +490,7 @@ public class VisualNode extends Widget {
 
     public void updateUI() {
         //mouse event driven methods go here
-        System.out.println("update");
+ //       System.out.println("update");
 
     }
 }

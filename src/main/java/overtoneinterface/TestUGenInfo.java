@@ -55,8 +55,8 @@ public class TestUGenInfo implements IUGenInfo{
     }
 
     @Override
-    public IUGenInput[] getInputs() {
-        return ugen.getInputs();
+    public IUGenConnection[] getInputs() {
+        return ugen.getConnections();
     }
 
     @Override

@@ -4,7 +4,6 @@
  */
 package visual.scene;
 
-import data.DataNode;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -13,13 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import dataScene.DataScene;
-import data.objects.DataFloat;
-import data.objects.IUGenDataObject;
-import data.objects.Metro;
-import data.objects.Print;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 import visual.UINodes.FloatDisplay;
 import visual.node.VisualNode;
 import visual.node.Port;
@@ -43,10 +36,9 @@ import org.netbeans.api.visual.widget.Scene;
 import org.netbeans.api.visual.widget.Widget;
 import org.netbeans.api.visual.widget.general.IconNodeWidget;
 import overtoneinterface.IUGen;
-import overtoneinterface.IUGenInfo;
-import overtoneinterface.IUGenInput;
+import overtoneinterface.IUGenConnection;
 import overtoneinterface.TestUGen;
-import overtoneinterface.TestUGenInput;
+import overtoneinterface.TestUGenConnection;
 
 /**
  *
@@ -62,7 +54,7 @@ public class VisualScene extends GraphScene {
     public static Port currentPort;
     private ArrayList<Widget> inputs = new ArrayList();
     private ArrayList<Widget> outputs = new ArrayList();
-    private WidgetAction multiMoveProvider = ActionFactory.createMoveAction(null, new MultiMoveProvider());
+    private WidgetAction multiMove = ActionFactory.createMoveAction(null, new MultiMoveProvider());
     private WidgetAction moveAction = ActionFactory.createAlignWithMoveAction(mainLayer, interactionLayer, null, false);
     private WidgetAction resizeAction = ActionFactory.createAlignWithResizeAction(mainLayer, interactionLayer, null, false);
     private WidgetAction hoverAction = ActionFactory.createHoverAction(new MyHoverProvider(this));
@@ -72,6 +64,7 @@ public class VisualScene extends GraphScene {
     public static final String CONNECTION_EDIT_TOOL = "connectionEditTool";
     public static final String USE = "alignMode";
     public static final String EDGE_CONTROL_MODE = "edgeControlMode";
+    public static final String MULTI_MOVE = "multiMove";
     private NodeCreator dataNodeCreator;
     private DataScene dataScene = new DataScene(this);
     private boolean over = false;
@@ -103,43 +96,13 @@ public class VisualScene extends GraphScene {
 
         getPriorActions().addAction(new KeyEventAction());  //add the scene key event listener
 
-
-//        VisualNode node3 = new VisualNode(this, dataScene, "metro 1000");
-//        node3.setPreferredLocation(new Point(100, 100));
-//
-//        VisualNode node4 = new VisualNode(this, dataScene, "f");
-//        node4.setPreferredLocation(new Point(100, 150));
-//
-//        VisualNode node1 = new VisualNode(this, dataScene, "f");
-//        node1.setPreferredLocation(new Point(60, 200));
-//
-//        VisualNode node2 = new VisualNode(this, dataScene, "f");
-//        node2.setPreferredLocation(new Point(140, 200));
-//
-//        VisualNode node5 = new VisualNode(this, dataScene, "f");
-//        node2.setPreferredLocation(new Point(100, 250));
-//
-//        this.addChild(node1);
-//        this.addChild(node2);
-//        this.addChild(node3);
-//        this.addChild(node4);
-//        this.addChild(node5);
-//
-//
-//        this.connect(node4, 0, node3, 0);
-//        this.connect(node3, 0, node2, 0);
-//        this.connect(node3, 0, node1, 0);
-//        this.connect(node1, 0, node5, 0);
-
-
+        //
+        //create test ugens
         TestUGen[] ugen = new TestUGen[10];
         for (int i = 0; i < 9; i++) {
             ugen[i] = new TestUGen("test", 500, 2, 2);
             if (i != 0) {
-                //create a new UGen connection difinition by just adding a new source ugen and port id
-                //this example just connects this ugen to the last one if it isn't the first one, then
-                //connects to port 0
-                ugen[i].addUGenInput(new TestUGenInput(ugen[i - 1], 0));
+                ugen[i - 1].addUGenInput(new TestUGenConnection(ugen[i - 1], 0, ugen[i], 1));
             }
         }
         setUGens(ugen);
@@ -306,19 +269,20 @@ public class VisualScene extends GraphScene {
 
         if (node.getType().equals(VisualNode.UI)) {
 //            widget.getActions().addAction();
-            System.out.println("ui node action created");
+//            System.out.println("ui node action created");
         }
         widget.createActions(USE).addAction(0, dragAction);
 
-        widget.createActions(EDIT).addAction(0, createObjectHoverAction());
-        widget.createActions(EDIT).addAction(1, ActionFactory.createMoveAction());
-        widget.createActions(EDIT).addAction(2, ActionFactory.createResizeAction());
-        // widget.createActions(EDIT).addAction(3, multiMoveProvider);
-
+        widget.createActions(EDIT).addAction(0, createSelectAction());
+        widget.createActions(EDIT).addAction(1, createObjectHoverAction());
+        widget.createActions(EDIT).addAction(2, multiMove);
+//        widget.createActions(EDIT).addAction(1, ActionFactory.createMoveAction());
+//        widget.createActions(EDIT).addAction(2, ActionFactory.createResizeAction());
 
         mainLayer.addChild(widget);
         return widget;
     }
+    
 
     @Override
     protected Widget attachEdgeWidget(Object e) {
@@ -341,7 +305,7 @@ public class VisualScene extends GraphScene {
 
 
 
-        System.out.println(connection.getSourceAnchor().getRelatedWidget().getParentWidget());
+//        System.out.println(connection.getSourceAnchor().getRelatedWidget().getParentWidget());
         //create the data connection
         Port srcPort = (Port) connection.getSourceAnchor().getRelatedWidget().getParentWidget();
         VisualNode src = srcPort.getParentNode();
@@ -370,7 +334,6 @@ public class VisualScene extends GraphScene {
         ConnectionWidget connection = new ConnectionWidget(this);
         Widget src = source.getOutputPort(sourcePort);
         Widget tgt = target.getInputPort(targetPort);
-        System.out.println(src + "  " + tgt);
         connection.setSourceAnchor(AnchorFactory.createCircularAnchor(src, 2));
         connection.setTargetAnchor(AnchorFactory.createCircularAnchor(tgt, 2));
         addEdge(connection);
@@ -405,8 +368,8 @@ public class VisualScene extends GraphScene {
     }
 
     private void printActiveToolMode() {
-        System.out.println(this.getActiveTool());
-        System.out.println(this.getActions());
+        //       System.out.println(this.getActiveTool());
+        //       System.out.println(this.getActions());
     }
 
     private void routeSelectedEdges() {
@@ -484,7 +447,7 @@ public class VisualScene extends GraphScene {
         for (int i = 0; i < this.getNodes().size() - 1; i++) {
             VisualNode node = (VisualNode) nodes[i];
             node.removeHoverActions();
-            System.out.println("hover scene off");
+            //           System.out.println("hover scene off");
         }
     }
 
@@ -648,8 +611,6 @@ public class VisualScene extends GraphScene {
         @Override
         public void setHovering(Widget widget) {
             if (widget != null) {
-                System.out.println(widget + "   is done with the hover shit");
-
                 ObjectState state = ObjectState.createNormal().deriveSelected(true);
                 widget.setBackground(scene.getLookFeel().getBackground(state));
                 widget.setForeground(Color.BLUE);
@@ -663,9 +624,9 @@ public class VisualScene extends GraphScene {
      *
      * @param ugens - an array of IUGenInfo objects sent from overtone/supercollider
      */
-    private void setUGens(IUGen[] ugens) {
+    public void setUGens(IUGen[] ugens) {
 
-      //  VisualNode[] reffNodes = new VisualNode[ugens.length];
+        //  VisualNode[] reffNodes = new VisualNode[ugens.length];
         Hashtable newNodes = new Hashtable();
         /*
          * create the nodes before connecting them
@@ -673,12 +634,11 @@ public class VisualScene extends GraphScene {
         for (int i = 0; i < ugens.length - 1; i++) {
             IUGen ugen = ugens[i];
             VisualNode visualNode = new VisualNode(this, dataScene, ugen);
-
             int tx = 50;
             int ty = i * 40;
             visualNode.setPreferredLocation(new Point(tx, ty));
 
-          //  reffNodes[i] = visualNode;
+            //  reffNodes[i] = visualNode;
             newNodes.put(ugen, visualNode);
 
             this.createNode(visualNode);
@@ -688,23 +648,21 @@ public class VisualScene extends GraphScene {
          * connect the nodes based on the IUGenInfo object
          */
         for (int i = 0; i < ugens.length - 1; i++) {
-            VisualNode node = (VisualNode) newNodes.get(ugens[i]);
-            IUGenInput[] nodeInputs = ugens[i].getInputs();
+            VisualNode sourceNode = (VisualNode) newNodes.get(ugens[i]);
+            IUGenConnection[] nodeConnections = ugens[i].getConnections();
+            if (nodeConnections.length > 0) {
+                for (int j = 0; j < nodeConnections.length; j++) {
 
-            for (int j = 0; j < nodeInputs.length - 1; j++) {
-                IUGenInput input = nodeInputs[j];
-                VisualNode sourceNode = (VisualNode) newNodes.get(input.getUGen());
-                int sourcePortId = input.getPortNumber();
-                System.out.println(sourceNode + "   " + sourcePortId + "   " +  node + "  0");
+                    IUGenConnection connection = nodeConnections[j];
+                    IUGen target = connection.getTarget();
 
-                ///////////
-                ////
-                int targetPortId = 0;
-                ////
-                //////////
+                    VisualNode targetNode = (VisualNode) newNodes.get(target);
 
+                    int sourcePortId = connection.getSourcePortNumber();
+                    int targetPortId = connection.getTargetPortNumber();
 
-                this.connect(sourceNode, sourcePortId, node, targetPortId);
+                    this.connect(sourceNode, sourcePortId, targetNode, targetPortId);
+                }
             }
         }
 

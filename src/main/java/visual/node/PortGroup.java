@@ -59,7 +59,6 @@ public class PortGroup extends Widget {
             this.addChild(port);
         }
         if (numPorts == 2) {
-    System.out.println(numPorts);
          //   setLayout(LayoutFactory.createHorizontalFlowLayout(LayoutFactory.SerialAlignment.CENTER, (int) (parent.getBounds().getWidth() / numPorts)));
         }
     }

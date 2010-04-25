@@ -38,7 +38,7 @@ public class NodeCreator {
     }
 
     public DataNode createDataNode(IUGen ugen, VisualNode visNode) {
-        DataNode node = new IUGenDataObject(ugen.getName(), visNode, dataScene, ugen.getInputs(), ugen.numOutputs(), ugen.getRate());
+        DataNode node = new IUGenDataObject(ugen.getName(), visNode, dataScene, ugen.numInputs(), ugen.numOutputs(), ugen.getRate());
         return node;
     }
 
@@ -48,7 +48,6 @@ public class NodeCreator {
         String fullTitle = s;
         DataNode returnNode = new DataNode("     ", node, dataScene, 1, 1);
         int argumentCount = arguments.size();
-        System.out.println(s);
         if (title.equals("print")) {
             if (argumentCount > 0) {
                 returnNode = new Print(s, node, dataScene);

@@ -35,9 +35,13 @@ public class PortInteractor extends Widget {
     private PortType portType;
     private boolean over = false;
     private Color highlightColor;
+    private VisualNode node;
+    private int portId;
 
-    public PortInteractor(VisualScene p, int s, PortType type) {
+    public PortInteractor(VisualScene p, int s, PortType type, VisualNode node, int portId) {
         super(p);
+        this.node = node;
+        this.portId = portId;
         portType = type;
         size = s;
         parentScene = p;
@@ -88,6 +92,14 @@ public class PortInteractor extends Widget {
         this.size = size;
     }
 
+    public VisualNode getNode() {
+        return node;
+    }
+
+    public int getPortNumber() {
+        return portId;
+    }
+
     private PortType getPortType() {
         return portType;
     }
@@ -99,10 +111,12 @@ public class PortInteractor extends Widget {
 
     private static class MyHoverProvider implements TwoStateHoverProvider {
 
+        @Override
         public void unsetHovering(Widget widget) {
             widget.setForeground(new Color(0, 0, 0, 0));
         }
 
+        @Override
         public void setHovering(Widget widget) {
             widget.setForeground(new Color(200, 255, 200));
         }
@@ -110,11 +124,13 @@ public class PortInteractor extends Widget {
 
     private class SceneConnectProvider implements ConnectProvider {
 
+        @Override
         public boolean isSourceWidget(Widget sourceWidget) {
             boolean bool = parentScene.isOutput(sourceWidget);
             return bool;
         }
 
+        @Override
         public ConnectorState isTargetWidget(Widget sourceWidget, Widget targetWidget) {
             //if tgt is an input, and is not from the same node then resolve
             if (parentScene.isInput(targetWidget) && (sourceWidget.getParentWidget().getParentWidget().getParentWidget() !=  targetWidget.getParentWidget().getParentWidget().getParentWidget())) {
@@ -123,16 +139,19 @@ public class PortInteractor extends Widget {
             return ConnectorState.REJECT_AND_STOP;
         }
 
+        @Override
         public boolean hasCustomTargetWidgetResolver(Scene scene) {
             return false;
         }
 
+        @Override
         public Widget resolveTargetWidget(Scene scene, Point sceneLocation) {
             return null;
         }
 
+        @Override
         public void createConnection(Widget sourceWidget, Widget targetWidget) {
-            parentScene.connect(sourceWidget, targetWidget);
+            parentScene.connect((PortInteractor) sourceWidget, (PortInteractor) targetWidget);
         }
     }
 }

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package visual.scene;
+package visual.node;
 
 import dataScene.DataScene;
 import java.util.ArrayList;
@@ -18,31 +18,39 @@ import data.objects.Metro;
 import data.objects.Print;
 import data.objects.Toggle;
 import overtoneinterface.IUGen;
-import visual.node.VisualNode;
-import overtoneinterface.IUGenInfo;
+import visual.scene.VisualScene;
 
 /**
  *
- * @author Jon
+ * @author Jon Rose
  */
 public class NodeCreator {
 
     DataScene dataScene;
-    VisualNode parent;
-    VisualScene modelScene;
+    VisualNode node;
+    VisualScene visualScene;
 
     public NodeCreator(DataScene dScene, VisualNode node, VisualScene scene) {
-        parent = node;
+        this.node = node;
         dataScene = dScene;
-        modelScene = scene;
+        visualScene = scene;
     }
 
     public DataNode createDataNode(IUGen ugen, VisualNode visNode) {
+        if (node.getConnections().length > 0) {
+            visualScene.removeConnections(node);
+        }
+        visualScene.removeConnections(node);
         DataNode node = new IUGenDataObject(ugen.getName(), visNode, dataScene, ugen.numInputs(), ugen.numOutputs(), ugen.getRate());
         return node;
     }
 
     public DataNode createDataNode(String s, VisualNode node) {
+
+        if (node.getConnections().length > 0) {
+            visualScene.removeConnections(node);
+        }
+
         ArrayList<Atom> arguments = this.stringToArguments(s);
         String title = this.sliceTitle(s);
         String fullTitle = s;
@@ -60,13 +68,13 @@ public class NodeCreator {
             }
 
         } else if (title.equals("f") || title.equals("float")) {
-            returnNode = new DataFloat(parent, dataScene);
+            returnNode = new DataFloat(this.node, dataScene);
             dataScene.addNode(returnNode);
             return returnNode;
 
         } else if (title.equals("t") || title.equals("toggle")) {
             try {
-                returnNode = new Toggle(parent, dataScene);
+                returnNode = new Toggle(this.node, dataScene);
                 dataScene.addNode(returnNode);
                 return returnNode;
             } catch (java.lang.RuntimeException e) {
@@ -92,8 +100,9 @@ public class NodeCreator {
                 return returnNode;
             }
         } else {
-            returnNode = new DataNode(parent, dataScene);
+            returnNode = this.node.getLastDataNode();
             dataScene.addNode(returnNode);
+            System.err.println("that object does not exist, reverting to last object");
             return returnNode;
         }
         return returnNode;

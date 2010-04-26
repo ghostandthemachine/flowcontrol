@@ -4,6 +4,7 @@
  */
 package visual.scene;
 
+import visual.node.NodeCreator;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -12,7 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import dataScene.DataScene;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import visual.UINodes.FloatDisplay;
 import visual.node.VisualNode;
 import visual.node.Port;
@@ -76,6 +79,7 @@ public class VisualScene extends GraphScene {
     private double yVelocity;
     private Point lastPointCreatedAt = new Point(400, 400);
     private boolean mouseDragged = false;
+    protected ArrayList<Connection> connections = new ArrayList<Connection>();
 
     public VisualScene() {
         addChild(backgroundLayer);
@@ -89,7 +93,9 @@ public class VisualScene extends GraphScene {
 
         getActions().addAction(ActionFactory.createZoomAction());
         getActions().addAction(ActionFactory.createPanAction());
-        getActions().addAction(hoverAction);
+
+
+        getActions().addAction(hoverAction);        //this hover action is needed for port highlights to turn them off(the scene takes over the mosue)
         getActions().addAction(new SceneMouseAction());
 
         getActions().addAction(ActionFactory.createRectangularSelectAction(this, backgroundLayer));
@@ -99,7 +105,7 @@ public class VisualScene extends GraphScene {
         //
         //create test ugens
         TestUGen[] ugen = new TestUGen[10];
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 10; i++) {
             ugen[i] = new TestUGen("test", 500, 2, 2);
             if (i != 0) {
                 ugen[i - 1].addUGenInput(new TestUGenConnection(ugen[i - 1], 0, ugen[i], 1));
@@ -274,15 +280,14 @@ public class VisualScene extends GraphScene {
         widget.createActions(USE).addAction(0, dragAction);
 
         widget.createActions(EDIT).addAction(0, createSelectAction());
-        widget.createActions(EDIT).addAction(1, createObjectHoverAction());
-        widget.createActions(EDIT).addAction(2, multiMove);
+        widget.createActions(EDIT).addAction(1, multiMove);
 //        widget.createActions(EDIT).addAction(1, ActionFactory.createMoveAction());
-//        widget.createActions(EDIT).addAction(2, ActionFactory.createResizeAction());
+        widget.createActions(EDIT).addAction(2, ActionFactory.createResizeAction());
+        widget.createActions(EDIT).addAction(3, createObjectHoverAction());
 
         mainLayer.addChild(widget);
         return widget;
     }
-    
 
     @Override
     protected Widget attachEdgeWidget(Object e) {
@@ -303,9 +308,6 @@ public class VisualScene extends GraphScene {
         connection.createActions(EDGE_CONTROL_MODE).addAction(5, createObjectHoverAction());
         connectionLayer.addChild(connection);
 
-
-
-//        System.out.println(connection.getSourceAnchor().getRelatedWidget().getParentWidget());
         //create the data connection
         Port srcPort = (Port) connection.getSourceAnchor().getRelatedWidget().getParentWidget();
         VisualNode src = srcPort.getParentNode();
@@ -339,13 +341,35 @@ public class VisualScene extends GraphScene {
         addEdge(connection);
         //create data connection
         dataScene.connect(source.getDataNode(), sourcePort, target.getDataNode(), targetPort);
+        //save one for each so that they connections can be accessed in both directions
+        connections.add(new Connection(source, sourcePort, target, targetPort, connection));
     }
 
-    public void connect(Widget sourceWidget, Widget targetWidget) {
+    public void connect(PortInteractor source, PortInteractor target) {
         ConnectionWidget connection = new ConnectionWidget(this);
-        connection.setSourceAnchor(AnchorFactory.createCircularAnchor(sourceWidget, 1));
-        connection.setTargetAnchor(AnchorFactory.createCircularAnchor(targetWidget, 1));
+        connection.setSourceAnchor(AnchorFactory.createCircularAnchor(source, 1));
+        connection.setTargetAnchor(AnchorFactory.createCircularAnchor(target, 1));
+
+        //save one for each so that they connections can be accessed in both directions
+        connections.add(new Connection(source.getNode(), source.getPortNumber(), target.getNode(), target.getPortNumber(), connection));
         addEdge(connection);
+    }
+
+    public void removeConnections(VisualNode node) {
+        System.out.println(connections.size());
+        for (Iterator i = connections.iterator(); i.hasNext();) {
+            Connection connection = (Connection) i.next();
+            if (connection.getSource() == node) {
+                //if the data scene has any connections using this node, remove them
+                dataScene.removeConnection(dataScene.getConnections(node.getDataNode()));
+                this.removeEdge(connection.getConnectionWidget());
+                connections.remove(connection);
+            } else if (connection.getTarget() == node) {
+                dataScene.removeConnection(dataScene.getConnections(node.getDataNode()));
+                this.removeEdge(connection.getConnectionWidget());
+                connections.remove(connection);
+            }
+        }
     }
 
     public void setDataScene(NodeCreator d) {
@@ -449,6 +473,10 @@ public class VisualScene extends GraphScene {
             node.removeHoverActions();
             //           System.out.println("hover scene off");
         }
+    }
+
+    public ArrayList<Connection> getConnections() {
+        return connections;
     }
 
     private class MyConnectProvider implements ConnectProvider {
@@ -613,7 +641,7 @@ public class VisualScene extends GraphScene {
             if (widget != null) {
                 ObjectState state = ObjectState.createNormal().deriveSelected(true);
                 widget.setBackground(scene.getLookFeel().getBackground(state));
-                widget.setForeground(Color.BLUE);
+                widget.setForeground(Color.yellow);
                 PortInteractor port = (PortInteractor) widget;
                 port.setOver(true);
             }
@@ -631,7 +659,7 @@ public class VisualScene extends GraphScene {
         /*
          * create the nodes before connecting them
          */
-        for (int i = 0; i < ugens.length - 1; i++) {
+        for (int i = 0; i < ugens.length; i++) {
             IUGen ugen = ugens[i];
             VisualNode visualNode = new VisualNode(this, dataScene, ugen);
             int tx = 50;
@@ -647,7 +675,7 @@ public class VisualScene extends GraphScene {
         /*
          * connect the nodes based on the IUGenInfo object
          */
-        for (int i = 0; i < ugens.length - 1; i++) {
+        for (int i = 0; i < ugens.length; i++) {
             VisualNode sourceNode = (VisualNode) newNodes.get(ugens[i]);
             IUGenConnection[] nodeConnections = ugens[i].getConnections();
             if (nodeConnections.length > 0) {
@@ -665,6 +693,8 @@ public class VisualScene extends GraphScene {
                 }
             }
         }
+
+
 
 
     }

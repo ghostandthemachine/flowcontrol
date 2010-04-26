@@ -7,11 +7,10 @@ package visual.node;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.HashSet;
 import atom.AtomFloat;
 import dataScene.DataScene;
 import data.DataNode;
-import visual.scene.NodeCreator;
+import java.util.ArrayList;
 import visual.node.PortGroup.PortType;
 import visual.scene.VisualScene;
 import org.netbeans.api.visual.action.ActionFactory;
@@ -28,11 +27,11 @@ import org.netbeans.api.visual.border.Border;
 import org.netbeans.api.visual.border.BorderFactory;
 import org.netbeans.api.visual.laf.LookFeel;
 import org.netbeans.api.visual.model.ObjectState;
-import org.netbeans.api.visual.widget.ConnectionWidget;
 import org.netbeans.api.visual.widget.LabelWidget;
 import org.netbeans.api.visual.widget.Widget;
 import overtoneinterface.IUGen;
 import overtoneinterface.IUGenInfo;
+import visual.scene.Connection;
 
 /**
  *
@@ -50,12 +49,11 @@ public class VisualNode extends Widget {
     protected int portWidth;
     protected int borderRadius = 10;
     protected Rectangle area;
-    protected VisualScene parentScene;
+    protected VisualScene visualScene;
     NodeMenu menu;
     DataScene dataScene;
     DataNode dataNode;
     NodeCreator dataNodeCreator;
-    protected HashSet connections = new HashSet();
     protected float value = 0;
     protected double mouseX;
     protected double mouseY;
@@ -67,14 +65,17 @@ public class VisualNode extends Widget {
     public static String DATA = "data";
     protected String type;
     private boolean mouseDragged = false;
+    Border border = BorderFactory.createRoundedBorder(borderRadius, borderRadius, 5, 2, Color.white, Color.black);
+    private DataNode lastDataNode;
 
     public VisualNode(VisualScene scene, DataScene dScene) {
         super(scene);
-        parentScene = scene;
+        visualScene = scene;
         dataScene = dScene;
         type = VisualNode.DATA;
-        dataNodeCreator = new NodeCreator(dScene, this, parentScene);
+        dataNodeCreator = new NodeCreator(dScene, this, visualScene);
         dataNode = new DataNode("     ", this, dataScene, 1, 1);
+        lastDataNode = dataNode;
         editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
 
         createLabelWidget(scene);
@@ -86,11 +87,12 @@ public class VisualNode extends Widget {
 
     public VisualNode(VisualScene scene, DataScene dScene, String label) {
         super(scene);
-        parentScene = scene;
+        visualScene = scene;
         dataScene = dScene;
         type = UI;
-        dataNodeCreator = new NodeCreator(dScene, this, parentScene);
+        dataNodeCreator = new NodeCreator(dScene, this, visualScene);
         dataNode = dataNodeCreator.createDataNode(label, this);
+        lastDataNode = dataNode;
         editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
 
         createLabelWidget(scene);
@@ -105,11 +107,12 @@ public class VisualNode extends Widget {
 
     public VisualNode(VisualScene scene, DataScene dScene, IUGen ugen) {
         super(scene);
-        parentScene = scene;
+        visualScene = scene;
         dataScene = dScene;
         type = UI;
-        dataNodeCreator = new NodeCreator(dScene, this, parentScene);
+        dataNodeCreator = new NodeCreator(dScene, this, visualScene);
         dataNode = dataNodeCreator.createDataNode(ugen, this);
+        lastDataNode = dataNode;
         editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
 
         createLabelWidget(scene);
@@ -122,16 +125,17 @@ public class VisualNode extends Widget {
         this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
     }
 
-        /**
+    /**
      * Implements the widget-state specific look of the widget.
      * @param previousState the previous state
      * @param state the new state
      */
     @Override
-    public void notifyStateChanged (ObjectState previousState, ObjectState state) {
-        LookFeel lookFeel = getScene ().getLookFeel ();
-        labelWidget.setBorder (lookFeel.getBorder (state));
-        labelWidget.setForeground (lookFeel.getForeground (state));
+    public void notifyStateChanged(ObjectState previousState, ObjectState state) {
+        LookFeel lookFeel = getScene().getLookFeel();
+        labelWidget.setBorder(border);
+        labelWidget.setForeground(lookFeel.getForeground(state));
+        //r       System.out.println(state.isObjectFocused());
     }
 
     private void createOutputPorts(VisualScene scene) {
@@ -147,15 +151,14 @@ public class VisualNode extends Widget {
     }
 
     private void createLabelWidget(VisualScene scene) {
-        Border border = BorderFactory.createRoundedBorder(borderRadius, borderRadius, 5, 2, Color.white, Color.black);
-        labelWidget = new LabelWidget(parentScene);
+        labelWidget = new LabelWidget(visualScene);
         labelWidget.setFont(scene.getDefaultFont().deriveFont(13.0f));
         labelWidget.getActions().addAction(editorAction);
         labelWidget.setOpaque(true);
         labelWidget.setLabel("            ");
         labelWidget.setBorder(border);
-        // labelWidget.setBorder(BorderFactory.createResizeBorder(5));
-        // labelWidget.setBorder(BorderFactory.createResizeBorder(8, Color.BLACK, true));
+        labelWidget.setBorder(BorderFactory.createResizeBorder(5));
+        labelWidget.setBorder(BorderFactory.createResizeBorder(20, Color.BLACK, true));
         addChild(labelWidget);
     }
 
@@ -174,10 +177,6 @@ public class VisualNode extends Widget {
 
     public float getValue() {
         return value;
-    }
-
-    public void addConnection(ConnectionWidget c) {
-        connections.add(c);
     }
 
     /**
@@ -242,7 +241,7 @@ public class VisualNode extends Widget {
     }
 
     public void setParameters(int ins, int outs, String title, String t) {
-        //   parentScene.removeNode(this);
+        //   visualScene.removeNode(this);
         removeChild(inputPorts);
         removeChild(outputPorts);
         removeChild(labelWidget);
@@ -251,11 +250,11 @@ public class VisualNode extends Widget {
         numOutputs = outs;
         type = t;
 
-        inputPorts = new PortGroup(parentScene, this, ins, PortType.INPUT);
+        inputPorts = new PortGroup(visualScene, this, ins, PortType.INPUT);
         inputPorts.setPreferredLocation(new Point(0, -22));
         addChild(inputPorts);
 
-        outputPorts = new PortGroup(parentScene, this, outs, PortType.OUTPUT);
+        outputPorts = new PortGroup(visualScene, this, outs, PortType.OUTPUT);
         outputPorts.setPreferredLocation(new Point(0, 0));
         addChild(outputPorts);
 
@@ -264,7 +263,7 @@ public class VisualNode extends Widget {
         outputPorts.setSapcing((int) (50 / (outs * 6)));
         inputPorts.setSapcing((int) (50 / (ins * 6)));
 
-        parentScene.getModelScene().addNode(this);
+        visualScene.getModelScene().addNode(this);
     }
 
     public Widget getLabelWidget() {
@@ -279,6 +278,7 @@ public class VisualNode extends Widget {
     }
 
     private void createDataNode(String text) {
+        lastDataNode = dataNode;
         dataNode = dataNodeCreator.createDataNode(text, this);
         this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
     }
@@ -300,7 +300,7 @@ public class VisualNode extends Widget {
     }
 
     public Object getModelScene() {
-        return parentScene;
+        return visualScene;
     }
 
     public void render() {
@@ -367,6 +367,10 @@ public class VisualNode extends Widget {
         labelWidget.repaint();
     }
 
+    public DataNode getLastDataNode() {
+        return lastDataNode;
+    }
+
     public void setMouseEvent(WidgetMouseEvent wme) {
         mouseX = wme.getPoint().getX();
         mouseY = wme.getPoint().getY();
@@ -379,7 +383,20 @@ public class VisualNode extends Widget {
 
     public void removeHoverActions() {
         outputPorts.removeHoverActions();
-  //      System.out.println("hover model node off");
+        //      System.out.println("hover model node off");
+    }
+
+    public Connection[] getConnections() {
+        ArrayList<Connection> connections = new ArrayList<Connection>();
+        Connection[] conns = new Connection[0];
+        for (int i = 0; i < visualScene.getConnections().size() - 1; i++) {
+            VisualNode source = visualScene.getConnections().get(i).getSource();
+            VisualNode target = visualScene.getConnections().get(i).getTarget();
+            if (source.equals(this) || target.equals(this)) {
+                connections.add(connections.get(i));
+            }
+        }
+        return connections.toArray(conns);
     }
 
     private class LabelTextFieldEditor implements TextFieldInplaceEditor {
@@ -471,6 +488,7 @@ public class VisualNode extends Widget {
     }
 
     public void focusLost(Widget widget, WidgetFocusEvent wfe) {
+        System.out.println("focus is lost on " + widget);
     }
 
     public void dragEnter(Widget widget, WidgetDropTargetDragEvent wdtde) {
@@ -490,8 +508,7 @@ public class VisualNode extends Widget {
 
     public void updateUI() {
         //mouse event driven methods go here
- //       System.out.println("update");
-
+        //       System.out.println("update");
     }
 }
 

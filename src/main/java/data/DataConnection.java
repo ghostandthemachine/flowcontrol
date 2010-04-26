@@ -17,12 +17,12 @@ public class DataConnection {
     int tgtId;
     Atom lastValue;
     DataNode currentObject;
-    DataNode srcParent;
-    DataNode tgtParent;
+    DataNode source;
+    DataNode target;
 
     public DataConnection(DataNode src, int srcid, DataNode tgt, int tgtid) {
-        srcParent = src;
-        tgtParent = tgt;
+        source = src;
+        target = tgt;
         srcId = srcid;
         tgtId = tgtid;
     }
@@ -32,7 +32,21 @@ public class DataConnection {
      * the specified ID (output number) and set the target nodes' input
      */
     public void update() {
-        tgtParent.setInput(tgtId, srcParent.getOutput(srcId));
-        tgtParent.update();
+        target.setInput(tgtId, source.getOutput(srcId));
+        target.update();
+    }
+
+    /**
+     *  return the source data node
+     */
+    public DataNode getSource() {
+        return source;
+    }
+
+    /**
+     *  return the target data node
+     */
+    public DataNode getTarget() {
+        return target;
     }
 }

@@ -32,7 +32,7 @@ public class Port extends Widget {
         portType = type;
         size = s;
         line = new PortLine(parentScene, size);
-        highlight = new PortInteractor(parentScene, size, portType);
+        highlight = new PortInteractor(parentScene, size, portType, parent, ID);
         parentNode = parent;
         addChild(line);
         addChild(highlight);

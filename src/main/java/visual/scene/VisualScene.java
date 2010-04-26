@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import dataScene.DataScene;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import visual.UINodes.FloatDisplay;
@@ -356,19 +355,22 @@ public class VisualScene extends GraphScene {
     }
 
     public void removeConnections(VisualNode node) {
-        System.out.println(connections.size());
-        for (Iterator i = connections.iterator(); i.hasNext();) {
+        Iterator<Connection> i = connections.iterator();
+        ArrayList<Connection> toRemove = new ArrayList<Connection>();
+        while (i.hasNext()) {
             Connection connection = (Connection) i.next();
-            if (connection.getSource() == node) {
+            if (connection.getSource() == node || connection.getTarget() == node) {
+                toRemove.add(connection);
                 //if the data scene has any connections using this node, remove them
                 dataScene.removeConnection(dataScene.getConnections(node.getDataNode()));
                 this.removeEdge(connection.getConnectionWidget());
-                connections.remove(connection);
-            } else if (connection.getTarget() == node) {
-                dataScene.removeConnection(dataScene.getConnections(node.getDataNode()));
-                this.removeEdge(connection.getConnectionWidget());
-                connections.remove(connection);
             }
+        }
+
+        Iterator<Connection> r = toRemove.iterator();
+        while (r.hasNext()) {
+            Connection removeConnection = r.next();
+            connections.remove(removeConnection);
         }
     }
 

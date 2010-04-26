@@ -13,6 +13,7 @@ import atom.AtomString;
 import data.DataNode;
 import data.objects.Add;
 import data.objects.DataFloat;
+import data.objects.DeadDataNode;
 import data.objects.IUGenDataObject;
 import data.objects.Metro;
 import data.objects.Print;
@@ -38,11 +39,10 @@ public class NodeCreator {
 
     public DataNode createDataNode(IUGen ugen, VisualNode visNode) {
         if (node.getConnections().length > 0) {
-            visualScene.removeConnections(node);
+          //  visualScene.removeConnections(node);
         }
-        visualScene.removeConnections(node);
-        DataNode node = new IUGenDataObject(ugen.getName(), visNode, dataScene, ugen.numInputs(), ugen.numOutputs(), ugen.getRate());
-        return node;
+        DataNode dNode = new IUGenDataObject(ugen.getName(), visNode, dataScene, ugen.numInputs(), ugen.numOutputs(), ugen.getRate());
+        return dNode;
     }
 
     public DataNode createDataNode(String s, VisualNode node) {
@@ -100,9 +100,9 @@ public class NodeCreator {
                 return returnNode;
             }
         } else {
-            returnNode = this.node.getLastDataNode();
+            returnNode = new DeadDataNode(s, node, dataScene, 0,0);
             dataScene.addNode(returnNode);
-            System.err.println("that object does not exist, reverting to last object");
+            System.err.println("'" + s + "'  is not a valid node in the library");
             return returnNode;
         }
         return returnNode;

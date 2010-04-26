@@ -139,13 +139,13 @@ public class VisualNode extends Widget {
     }
 
     private void createOutputPorts(VisualScene scene) {
-        outputPorts = new PortGroup(scene, this, 1, PortType.OUTPUT);
+        outputPorts = new PortGroup(scene, this, numOutputs, PortType.OUTPUT);
         outputPorts.setPreferredLocation(new Point(0, 0));
         addChild(outputPorts);
     }
 
     private void createInputPorts(VisualScene scene) {
-        inputPorts = new PortGroup(scene, this, 1, PortType.INPUT);
+        inputPorts = new PortGroup(scene, this, numInputs, PortType.INPUT);
         inputPorts.setPreferredLocation(new Point(0, -22));
         addChild(inputPorts);
     }
@@ -260,9 +260,14 @@ public class VisualNode extends Widget {
 
         labelWidget.setLabel(title);
         addChild(labelWidget);
-        outputPorts.setSapcing((int) (50 / (outs * 6)));
-        inputPorts.setSapcing((int) (50 / (ins * 6)));
 
+        if (outs > 0) {
+            outputPorts.setSapcing((int) (50 / (outs * 6)));
+        }
+        if (ins > 0) {
+            inputPorts.setSapcing((int) (50 / (ins * 6)));
+        }
+        
         visualScene.getModelScene().addNode(this);
     }
 
@@ -388,14 +393,15 @@ public class VisualNode extends Widget {
 
     public Connection[] getConnections() {
         ArrayList<Connection> connections = new ArrayList<Connection>();
-        Connection[] conns = new Connection[0];
-        for (int i = 0; i < visualScene.getConnections().size() - 1; i++) {
+        Connection[] conns;
+        for (int i = 0; i < visualScene.getConnections().size(); i++) {
             VisualNode source = visualScene.getConnections().get(i).getSource();
             VisualNode target = visualScene.getConnections().get(i).getTarget();
             if (source.equals(this) || target.equals(this)) {
-                connections.add(connections.get(i));
+                connections.add(visualScene.getConnections().get(i));
             }
         }
+        conns = new Connection[connections.size()];
         return connections.toArray(conns);
     }
 
@@ -420,7 +426,8 @@ public class VisualNode extends Widget {
 
         @Override
         public void setText(Widget widget, String text) {
-            ((LabelWidget) widget).setLabel(text);
+            LabelWidget label = (LabelWidget) widget;
+            label.setLabel(text);
             VisualNode newNode = (VisualNode) widget.getParentWidget();
             newNode.createDataNode(text);
         }

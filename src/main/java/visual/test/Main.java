@@ -4,44 +4,27 @@
  */
 package visual.test;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import visual.scene.VisualScene;
+import visual.scene.FlowControl;
 
 /**
  *
  * @author Jon Rose
  */
-public class Main extends JPanel {
+public class Main {
     //Create the JFrame:
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("flow editor");
         frame.setPreferredSize(new Dimension(800, 800));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(new Main());
+        frame.setContentPane(new FlowControl());
         frame.pack();
         frame.setVisible(true);
     }
 
     public Main() {
-        initComponents();
-    }
 
-    private void initComponents() {
-        VisualScene scene = new VisualScene();
-        //Set the layout:
-        setLayout(new BorderLayout());
-        //Create a JScrollPane:
-        JScrollPane scrollPane = new JScrollPane();
-        //Add the JScrollPane to the JPanel:
-        add(scrollPane, BorderLayout.CENTER);
-      //  add(new ToolBar(scene, this), BorderLayout.SOUTH);
-
-        scrollPane.setViewportView(scene.createView());
-        add(scene.createSatelliteView(), BorderLayout.WEST);
     }
 }

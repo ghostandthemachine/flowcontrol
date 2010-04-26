@@ -36,6 +36,7 @@ public class Metro extends DataNode {
     public void update() {
         this.setOutput(0, this.getValue());
         updateConnections();
+        this.getParent().repaint();
     }
 }
 

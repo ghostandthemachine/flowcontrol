@@ -41,6 +41,7 @@ import overtoneinterface.IUGen;
 import overtoneinterface.IUGenConnection;
 import overtoneinterface.TestUGen;
 import overtoneinterface.TestUGenConnection;
+import visual.node.CustomNode;
 
 /**
  *
@@ -111,6 +112,11 @@ public class VisualScene extends GraphScene {
             }
         }
         setUGens(ugen);
+
+
+//        CustomNode node = new CustomNode(this, dataScene);
+//        node.setPreferredLocation(new Point(300,20));
+//        this.addChild(node);
     }
 
     public boolean isMouseDragged() {

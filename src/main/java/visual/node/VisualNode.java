@@ -10,6 +10,8 @@ import java.awt.Rectangle;
 import atom.AtomFloat;
 import dataScene.DataScene;
 import data.DataNode;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import visual.node.PortGroup.PortType;
 import visual.scene.VisualScene;
@@ -24,7 +26,6 @@ import org.netbeans.api.visual.action.WidgetAction.WidgetKeyEvent;
 import org.netbeans.api.visual.action.WidgetAction.WidgetMouseEvent;
 import org.netbeans.api.visual.action.WidgetAction.WidgetMouseWheelEvent;
 import org.netbeans.api.visual.border.Border;
-import org.netbeans.api.visual.border.BorderFactory;
 import org.netbeans.api.visual.laf.LookFeel;
 import org.netbeans.api.visual.model.ObjectState;
 import org.netbeans.api.visual.widget.LabelWidget;
@@ -65,8 +66,11 @@ public class VisualNode extends Widget {
     public static String DATA = "data";
     protected String type;
     private boolean mouseDragged = false;
-    Border border = BorderFactory.createRoundedBorder(borderRadius, borderRadius, 5, 2, Color.white, Color.black);
+    NodeBorder border = new NodeBorder(borderRadius, 5, 2, new Color(255,255,255), new Color(200,200,200), 3);
     private DataNode lastDataNode;
+    protected Color fillColor = Color.white;
+    protected Color selectedFillColor = Color.lightGray;
+    protected Color textColor = Color.BLACK;
 
     public VisualNode(VisualScene scene, DataScene dScene) {
         super(scene);
@@ -125,6 +129,8 @@ public class VisualNode extends Widget {
         this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
     }
 
+
+
     /**
      * Implements the widget-state specific look of the widget.
      * @param previousState the previous state
@@ -134,31 +140,35 @@ public class VisualNode extends Widget {
     public void notifyStateChanged(ObjectState previousState, ObjectState state) {
         LookFeel lookFeel = getScene().getLookFeel();
         labelWidget.setBorder(border);
-        labelWidget.setForeground(lookFeel.getForeground(state));
-        //r       System.out.println(state.isObjectFocused());
+        labelWidget.setForeground(state.isSelected() ? Color.black : Color.black);
+        border.setFill(state.isSelected() ? Color.lightGray : Color.white);
     }
 
     private void createOutputPorts(VisualScene scene) {
         outputPorts = new PortGroup(scene, this, numOutputs, PortType.OUTPUT);
         outputPorts.setPreferredLocation(new Point(0, 0));
         addChild(outputPorts);
+        outputPorts.bringToFront();
     }
 
     private void createInputPorts(VisualScene scene) {
         inputPorts = new PortGroup(scene, this, numInputs, PortType.INPUT);
         inputPorts.setPreferredLocation(new Point(0, -22));
         addChild(inputPorts);
+        inputPorts.bringToFront();
     }
 
     private void createLabelWidget(VisualScene scene) {
+        border.setFill(Color.white);
+        border.setDraw(Color.gray);
         labelWidget = new LabelWidget(visualScene);
-        labelWidget.setFont(scene.getDefaultFont().deriveFont(13.0f));
+        labelWidget.setForeground(Color.red);
+
+        labelWidget.setFont(new Font("verdana", Font.BOLD, 13));
         labelWidget.getActions().addAction(editorAction);
-        labelWidget.setOpaque(true);
         labelWidget.setLabel("            ");
-        labelWidget.setBorder(border);
-        labelWidget.setBorder(BorderFactory.createResizeBorder(5));
-        labelWidget.setBorder(BorderFactory.createResizeBorder(20, Color.BLACK, true));
+        labelWidget.setPreferredLocation(new Point(borderRadius/2, 0));
+
         addChild(labelWidget);
     }
 
@@ -309,7 +319,7 @@ public class VisualNode extends Widget {
     }
 
     public void render() {
-        this.repaint();
+    //    this.repaint();
     }
 
     public void setMouseDragged(boolean b) {

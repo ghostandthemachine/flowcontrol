@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import atom.AtomFloat;
+import compositeNodes.OvertoneNode;
 import dataScene.DataScene;
 import data.DataNode;
 import java.awt.Font;
@@ -25,13 +26,14 @@ import org.netbeans.api.visual.action.WidgetAction.WidgetFocusEvent;
 import org.netbeans.api.visual.action.WidgetAction.WidgetKeyEvent;
 import org.netbeans.api.visual.action.WidgetAction.WidgetMouseEvent;
 import org.netbeans.api.visual.action.WidgetAction.WidgetMouseWheelEvent;
-import org.netbeans.api.visual.border.Border;
 import org.netbeans.api.visual.laf.LookFeel;
 import org.netbeans.api.visual.model.ObjectState;
 import org.netbeans.api.visual.widget.LabelWidget;
 import org.netbeans.api.visual.widget.Widget;
 import overtoneinterface.IUGen;
 import overtoneinterface.IUGenInfo;
+import overtoneinterface.TestUGen;
+import trie.Trie;
 import visual.scene.Connection;
 
 /**
@@ -66,11 +68,12 @@ public class VisualNode extends Widget {
     public static String DATA = "data";
     protected String type;
     private boolean mouseDragged = false;
-    NodeBorder border = new NodeBorder(borderRadius, 5, 2, new Color(255,255,255), new Color(200,200,200), 3);
+    NodeBorder border = new NodeBorder(borderRadius, 5, 2, new Color(255, 255, 255), new Color(200, 200, 200), 3);
     private DataNode lastDataNode;
     protected Color fillColor = Color.white;
     protected Color selectedFillColor = Color.lightGray;
     protected Color textColor = Color.BLACK;
+    private TestUGen ugen;
 
     public VisualNode(VisualScene scene, DataScene dScene) {
         super(scene);
@@ -99,23 +102,21 @@ public class VisualNode extends Widget {
         lastDataNode = dataNode;
         editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
 
+
         createLabelWidget(scene);
         createInputPorts(scene);
         createOutputPorts(scene);
 
         scene.addNode(this);
-
-        //after construction, reset the label to be current with the dataNode
-        this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
     }
 
-    public VisualNode(VisualScene scene, DataScene dScene, IUGen ugen) {
+    public VisualNode(VisualScene scene, DataScene dScene, OvertoneNode ugen) {
         super(scene);
         visualScene = scene;
         dataScene = dScene;
         type = UI;
         dataNodeCreator = new NodeCreator(dScene, this, visualScene);
-        dataNode = dataNodeCreator.createDataNode(ugen, this);
+        //   dataNode = dataNodeCreator.createDataNode(ugen, this);
         lastDataNode = dataNode;
         editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
 
@@ -124,12 +125,7 @@ public class VisualNode extends Widget {
         createOutputPorts(scene);
 
         scene.addNode(this);
-
-        //after construction, reset the label to be current with the dataNode
-        this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
     }
-
-
 
     /**
      * Implements the widget-state specific look of the widget.
@@ -159,15 +155,14 @@ public class VisualNode extends Widget {
     }
 
     private void createLabelWidget(VisualScene scene) {
+        this.setBackground(new Color(0, 0, 0, 0));
         border.setFill(Color.white);
         border.setDraw(Color.gray);
         labelWidget = new LabelWidget(visualScene);
-        labelWidget.setForeground(Color.red);
-
         labelWidget.setFont(new Font("verdana", Font.BOLD, 13));
         labelWidget.getActions().addAction(editorAction);
         labelWidget.setLabel("            ");
-        labelWidget.setPreferredLocation(new Point(borderRadius/2, 0));
+        labelWidget.setPreferredLocation(new Point(borderRadius / 2, 0));
 
         addChild(labelWidget);
     }
@@ -248,36 +243,37 @@ public class VisualNode extends Widget {
     @Override
     public void paintWidget() {
         updateModel();
+        super.paintBackground();
+        Graphics2D g = getGraphics();
     }
 
-    public void setParameters(int ins, int outs, String title, String t) {
+    public void setParameters(IUGen source) {
         //   visualScene.removeNode(this);
         removeChild(inputPorts);
         removeChild(outputPorts);
         removeChild(labelWidget);
 
-        numInputs = ins;
-        numOutputs = outs;
-        type = t;
+        numInputs = source.numInputs();
+        numOutputs = source.numOutputs();
 
-        inputPorts = new PortGroup(visualScene, this, ins, PortType.INPUT);
+        inputPorts = new PortGroup(visualScene, this, numInputs, PortType.INPUT);
         inputPorts.setPreferredLocation(new Point(0, -22));
         addChild(inputPorts);
 
-        outputPorts = new PortGroup(visualScene, this, outs, PortType.OUTPUT);
+        outputPorts = new PortGroup(visualScene, this, numOutputs, PortType.OUTPUT);
         outputPorts.setPreferredLocation(new Point(0, 0));
         addChild(outputPorts);
 
-        labelWidget.setLabel(title);
+        labelWidget.setLabel(source.getName());
         addChild(labelWidget);
 
-        if (outs > 0) {
-            outputPorts.setSapcing((int) (50 / (outs * 6)));
+        if (numOutputs > 0) {
+            outputPorts.setSapcing((int) (50 / (numOutputs * 6)));
         }
-        if (ins > 0) {
-            inputPorts.setSapcing((int) (50 / (ins * 6)));
+        if (numInputs > 0) {
+            inputPorts.setSapcing((int) (50 / (numInputs * 6)));
         }
-        
+
         visualScene.getModelScene().addNode(this);
     }
 
@@ -290,17 +286,6 @@ public class VisualNode extends Widget {
     }
 
     public void updateNode() {
-    }
-
-    private void createDataNode(String text) {
-        lastDataNode = dataNode;
-        dataNode = dataNodeCreator.createDataNode(text, this);
-        this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
-    }
-
-    private void createDataNode(IUGenInfo ugen) {
-        dataNode = dataNodeCreator.createDataNode(ugen.getName(), this);
-        this.setParameters(dataNode.getNumInputs(), dataNode.getNumOutputs(), dataNode.getTitle(), dataNode.getType());
     }
 
     public int getBorderRadius() {
@@ -319,7 +304,7 @@ public class VisualNode extends Widget {
     }
 
     public void render() {
-    //    this.repaint();
+        //    this.repaint();
     }
 
     public void setMouseDragged(boolean b) {
@@ -386,6 +371,14 @@ public class VisualNode extends Widget {
         return lastDataNode;
     }
 
+    public int getNumOutputs() {
+        return numOutputs;
+    }
+
+    public int getNumInputs() {
+        return numInputs;
+    }
+
     public void setMouseEvent(WidgetMouseEvent wme) {
         mouseX = wme.getPoint().getX();
         mouseY = wme.getPoint().getY();
@@ -415,6 +408,15 @@ public class VisualNode extends Widget {
         return connections.toArray(conns);
     }
 
+    public void createNewIUGenNode(IUGenInfo info) {
+        if(info != null) {
+        this.ugen = new TestUGen(info);
+        this.setParameters(ugen);
+        } else {
+            System.out.println("that is not a valid ugen");
+        }
+    }
+
     private class LabelTextFieldEditor implements TextFieldInplaceEditor {
 
         private VisualNode node;
@@ -438,8 +440,18 @@ public class VisualNode extends Widget {
         public void setText(Widget widget, String text) {
             LabelWidget label = (LabelWidget) widget;
             label.setLabel(text);
-            VisualNode newNode = (VisualNode) widget.getParentWidget();
-            newNode.createDataNode(text);
+            System.out.println(visualScene.getTrie());
+
+            try {
+                //Trie returns the object if there is a single match, otherwisr it returns a tri of elements
+                createNewIUGenNode((IUGenInfo) visualScene.getTrie().searchExact(text));
+            } catch (java.lang.ClassCastException e) {
+                Trie trie = (Trie) visualScene.getTrie().getTrieFor(text);
+              //  trie.searchExact(text)
+                System.out.println(trie.contents());
+            }
+            //VisualNode newNode = (VisualNode) widget.getParentWidget();
+            //newNode.createDataNode(text);
         }
     }
 

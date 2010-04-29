@@ -10,6 +10,7 @@ import atom.Atom;
 import atom.AtomFloat;
 import atom.AtomInt;
 import atom.AtomString;
+import compositeNodes.OvertoneNode;
 import data.DataNode;
 import data.objects.Add;
 import data.objects.DataFloat;
@@ -39,11 +40,26 @@ public class NodeCreator {
 
     public DataNode createDataNode(IUGen ugen, VisualNode visNode) {
         if (node.getConnections().length > 0) {
-          //  visualScene.removeConnections(node);
+            visualScene.removeConnections(node);
         }
         DataNode dNode = new IUGenDataObject(ugen.getName(), visNode, dataScene, ugen.numInputs(), ugen.numOutputs(), ugen.getRate());
         return dNode;
     }
+
+//    public DataNode createDataNode(String nodeName, VisualNode visNode) {
+//        //if the node is being edited/rebuilt, then remove its' connections before creating new node
+//        if (visNode.getConnections().length > 0) {
+//            visualScene.removeConnections(visNode);
+//        }
+//
+//        //if this node is in the dataBase, build it
+//        if(visualScene.getDatabase().containsKey(nodeName)){
+//            OvertoneNode newNode = (OvertoneNode) visualScene.getDatabase().get(nodeName);
+//
+//        }
+//
+//    return null;
+//    }
 
     public DataNode createDataNode(String s, VisualNode node) {
 
@@ -100,7 +116,7 @@ public class NodeCreator {
                 return returnNode;
             }
         } else {
-            returnNode = new DeadDataNode(s, node, dataScene, 0,0);
+            returnNode = new DeadDataNode(s, node, dataScene, 0, 0);
             dataScene.addNode(returnNode);
             System.err.println("'" + s + "'  is not a valid node in the library");
             return returnNode;

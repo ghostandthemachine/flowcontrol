@@ -28,7 +28,6 @@ public class TestUGen implements IUGen {
         this.nOutputs = outs;
 
         params = new TestUGenParameter(name, defaultValue);
-        info = new TestUGenInfo(this);
     }
 
     public TestUGen(String name, int rate, int ins, int outs, IUGenConnection[] inputs) {
@@ -42,7 +41,15 @@ public class TestUGen implements IUGen {
         }
 
         params = new TestUGenParameter(name, defaultValue);
-        info = new TestUGenInfo(this);
+    }
+
+    public TestUGen(IUGenInfo info) {
+        this.name = info.getName();
+        this.rate = info.getRate();
+        this.nInputs = info.numInputs();
+        this.nOutputs = info.numOutputs();
+
+        params = new TestUGenParameter(name, defaultValue);
     }
 
     public void addUGenInput(TestUGenConnection input) {

@@ -4,23 +4,17 @@
  */
 package overtoneinterface;
 
+import compositeNodes.OvertoneNode;
+
 /**
  *
  * @author Jon
  */
-public interface IUGen {
-
-    String getName();
+public interface IUGen extends OvertoneNode {
 
     int getRate();
 
-    int numOutputs();
-
-    int numInputs();
-
     IUGenConnection[] getConnections();
-
-    int getNumConnections();
 
     public TestUGenParameter getParameters();
 }

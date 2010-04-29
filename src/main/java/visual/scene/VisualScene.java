@@ -4,6 +4,9 @@
  */
 package visual.scene;
 
+import org.openide.util.Exceptions;
+import trie.BadKeyException;
+import trie.NonUniqueKeyException;
 import visual.node.NodeCreator;
 import java.awt.Color;
 import java.awt.Point;
@@ -13,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import dataScene.DataScene;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import visual.UINodes.FloatDisplay;
@@ -28,10 +32,8 @@ import org.netbeans.api.visual.action.WidgetAction;
 import org.netbeans.api.visual.action.WidgetAction.WidgetMouseEvent;
 import org.netbeans.api.visual.anchor.AnchorFactory;
 import org.netbeans.api.visual.anchor.AnchorShape;
-import org.netbeans.api.visual.anchor.PointShape;
 import org.netbeans.api.visual.graph.GraphScene;
 import org.netbeans.api.visual.model.ObjectState;
-import org.netbeans.api.visual.router.RouterFactory;
 import org.netbeans.api.visual.widget.ConnectionWidget;
 import org.netbeans.api.visual.widget.LayerWidget;
 import org.netbeans.api.visual.widget.Scene;
@@ -39,9 +41,11 @@ import org.netbeans.api.visual.widget.Widget;
 import org.netbeans.api.visual.widget.general.IconNodeWidget;
 import overtoneinterface.IUGen;
 import overtoneinterface.IUGenConnection;
-import overtoneinterface.TestUGen;
-import overtoneinterface.TestUGenConnection;
-import visual.node.CustomNode;
+import overtoneinterface.IUGenInfo;
+import overtoneinterface.TestUGenInfo;
+import trie.Trie;
+import visual.node.CustomRouterFactory;
+import visual.node.FlowControlPointShape;
 
 /**
  *
@@ -80,6 +84,8 @@ public class VisualScene extends GraphScene {
     private Point lastPointCreatedAt = new Point(400, 400);
     private boolean mouseDragged = false;
     protected ArrayList<Connection> connections = new ArrayList<Connection>();
+    private HashMap customRenderer = new HashMap();
+    public Trie trie = new Trie();
 
     public VisualScene() {
         addChild(backgroundLayer);
@@ -91,32 +97,33 @@ public class VisualScene extends GraphScene {
         //set the initial tool
         this.setActiveTool(EDIT);
 
+
         getActions().addAction(ActionFactory.createZoomAction());
         getActions().addAction(ActionFactory.createPanAction());
-
-
         getActions().addAction(hoverAction);        //this hover action is needed for port highlights to turn them off(the scene takes over the mosue)
         getActions().addAction(new SceneMouseAction());
-
         getActions().addAction(ActionFactory.createRectangularSelectAction(this, backgroundLayer));
 
         getPriorActions().addAction(new KeyEventAction());  //add the scene key event listener
 
         //
         //create test ugens
-        TestUGen[] ugen = new TestUGen[10];
-        for (int i = 0; i < 10; i++) {
-            ugen[i] = new TestUGen("test", 500, 2, 2);
-            if (i != 0) {
-                ugen[i - 1].addUGenInput(new TestUGenConnection(ugen[i - 1], 0, ugen[i], 1));
-            }
-        }
-        setUGens(ugen);
+        ArrayList<IUGenInfo> ugen = new ArrayList<IUGenInfo>() {};
 
+        TestUGenInfo ugen0 = new TestUGenInfo("test0", 500, 2, 2);
+        TestUGenInfo ugen1 = new TestUGenInfo("shitty", 500, 2, 2);
+        TestUGenInfo ugen2 = new TestUGenInfo("addition", 500, 2, 2);
+        TestUGenInfo ugen3 = new TestUGenInfo("add", 500, 2, 2);
+        ugen.add(ugen0);
+        ugen.add(ugen1);
+        ugen.add(ugen2);
+        ugen.add(ugen3);
 
-//        CustomNode node = new CustomNode(this, dataScene);
-//        node.setPreferredLocation(new Point(300,20));
-//        this.addChild(node);
+        addIUGenInfo(ugen);
+    }
+
+    public Trie getTrie() {
+        return trie;
     }
 
     public boolean isMouseDragged() {
@@ -278,19 +285,15 @@ public class VisualScene extends GraphScene {
         widget.setToolTipText("flow node");
         VisualNode node = (VisualNode) n;
 
-        if (node.getType().equals(VisualNode.UI)) {
-//            widget.getActions().addAction();
-//            System.out.println("ui node action created");
-        }
         widget.createActions(USE).addAction(0, dragAction);
 
         widget.createActions(EDIT).addAction(0, createSelectAction());
         widget.createActions(EDIT).addAction(1, multiMove);
-//        widget.createActions(EDIT).addAction(1, ActionFactory.createMoveAction());
         widget.createActions(EDIT).addAction(2, ActionFactory.createResizeAction());
         widget.createActions(EDIT).addAction(3, createObjectHoverAction());
 
         mainLayer.addChild(widget);
+
         return widget;
     }
 
@@ -299,18 +302,16 @@ public class VisualScene extends GraphScene {
         //create the visual connection
         ConnectionWidget connection = (ConnectionWidget) e;
         connection.setPaintControlPoints(true);
-        connection.setRouter(RouterFactory.createFreeRouter());
-        connection.setControlPointShape(PointShape.SQUARE_FILLED_SMALL);
-
-        //      connection.createActions(EDIT).addAction(createSelectAction());          //when this is on it consumes the mouse events and doesn't allow selectedObjects to easily be created over the port intetractor
+        connection.setRouter(CustomRouterFactory.createFreeRouter());
+        connection.setControlPointShape(FlowControlPointShape.CIRCLE_FILLED_SMALL);
 
         //Normal Edit Mode actions
         connection.createActions(EDGE_CONTROL_MODE).addAction(0, ActionFactory.createAddRemoveControlPointAction());
         connection.createActions(EDGE_CONTROL_MODE).addAction(1, ActionFactory.createFreeMoveControlPointAction());
         connection.createActions(EDGE_CONTROL_MODE).addAction(2, ActionFactory.createAddRemoveControlPointAction());
         connection.createActions(EDGE_CONTROL_MODE).addAction(3, ActionFactory.createFreeMoveControlPointAction());
-        connection.createActions(EDGE_CONTROL_MODE).addAction(4, createSelectAction());
-        connection.createActions(EDGE_CONTROL_MODE).addAction(5, createObjectHoverAction());
+        connection.createActions(EDGE_CONTROL_MODE).addAction(4, createObjectHoverAction());
+
         connectionLayer.addChild(connection);
 
         //create the data connection
@@ -410,7 +411,7 @@ public class VisualScene extends GraphScene {
         for (int i = 0; i < selectedObjects.length; i++) {
             if (selectedObjects[i].getClass() == conn.getClass()) {
                 ConnectionWidget connection = (ConnectionWidget) selectedObjects[i];
-                connection.setRouter(RouterFactory.createOrthogonalSearchRouter(mainLayer));
+                connection.setRouter(CustomRouterFactory.createOrthogonalSearchRouter(mainLayer));
             }
         }
     }
@@ -421,7 +422,7 @@ public class VisualScene extends GraphScene {
         for (int i = 0; i < selectedObjects.length; i++) {
             if (selectedObjects[i].getClass() == conn.getClass()) {
                 ConnectionWidget connection = (ConnectionWidget) selectedObjects[i];
-                connection.setRouter(RouterFactory.createDirectRouter());
+                connection.setRouter(CustomRouterFactory.createDirectRouter());
             }
         }
     }
@@ -485,6 +486,22 @@ public class VisualScene extends GraphScene {
 
     public ArrayList<Connection> getConnections() {
         return connections;
+    }
+
+    private void addEdgeSelectionAction() {
+        Collection<ConnectionWidget> edges = this.getEdges();
+        for (Iterator i = edges.iterator(); i.hasNext();) {
+            ConnectionWidget connection = (ConnectionWidget) i.next();
+            connection.getActions().addAction(createSelectAction());
+        }
+    }
+
+    private void removeEdgeSelectionAction() {
+        Collection<ConnectionWidget> edges = this.getEdges();
+        for (Iterator i = edges.iterator(); i.hasNext();) {
+            ConnectionWidget connection = (ConnectionWidget) i.next();
+            connection.getActions().removeAction(createSelectAction());
+        }
     }
 
     private class MyConnectProvider implements ConnectProvider {
@@ -572,7 +589,7 @@ public class VisualScene extends GraphScene {
         @Override
         public State keyPressed(Widget widget, WidgetKeyEvent event) {
             VisualScene scene = (VisualScene) widget;
-
+            System.out.println(event.getModifiers());
             if (event.getKeyCode() == KeyEvent.VK_N) {      //type 'n' to create a new object
                 VisualNode node = new VisualNode(scene.getModelScene(), scene.getDataScene());
                 node.setPreferredLocation(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
@@ -591,6 +608,8 @@ public class VisualScene extends GraphScene {
             if (event.isAltDown() && event.getKeyCode() == KeyEvent.VK_A) {    //alt + 'a' for align mode toggle
                 scene.setAlignMode();
                 scene.removeHoverActions();
+
+                System.out.println(scene.getSelectedObjects().toString());
             }
 
             if (event.isAltDown() && event.getKeyCode() == KeyEvent.VK_E) {    //alt + 'e' for edit/use mode toggle
@@ -608,6 +627,7 @@ public class VisualScene extends GraphScene {
 
             if (event.getKeyCode() == KeyEvent.VK_E) {
                 widget.getScene().setActiveTool(EDGE_CONTROL_MODE);
+                scene.addEdgeSelectionAction();
 
             } else if (event.getKeyCode() == KeyEvent.VK_DELETE) {
                 //need to add object and edge deletion
@@ -701,9 +721,22 @@ public class VisualScene extends GraphScene {
                 }
             }
         }
+    }
 
-
-
-
+    /**
+     *
+     * @param ugens - an array of IUGenInfo objects sent from overtone/supercollider
+     */
+    public void addIUGenInfo(ArrayList<IUGenInfo> info) {
+        for (Iterator i = info.iterator(); i.hasNext();) {
+            try {
+                IUGenInfo ugenInfo = (IUGenInfo) i.next();
+                trie.insert(ugenInfo.getName(), ugenInfo);
+            } catch (NonUniqueKeyException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (BadKeyException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
     }
 }

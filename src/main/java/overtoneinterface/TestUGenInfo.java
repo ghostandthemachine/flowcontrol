@@ -11,22 +11,20 @@ package overtoneinterface;
  */
 public class TestUGenInfo implements IUGenInfo{
 
-    TestUGen ugen;
     String name;
     TestUGenParameter params;
     int rate;
     int nOutputs;
     int nInputs;
     
-    public TestUGenInfo(IUGen ugen) {
+    public TestUGenInfo(String name, int rate, int ins, int outs) {
 
-        this.ugen = (TestUGen) ugen;
-        this.name = ugen.getName();
-        this.rate = ugen.getRate();
-        this.nInputs = ugen.numInputs();
-        this.nOutputs = ugen.numOutputs();
+        this.name = name;
+        this.rate = rate;
+        this.nInputs = ins;
+        this.nOutputs = outs;
 
-        params = ugen.getParameters();
+        params = new TestUGenParameter(name, 500);
     }
 
     @Override
@@ -56,7 +54,7 @@ public class TestUGenInfo implements IUGenInfo{
 
     @Override
     public IUGenConnection[] getInputs() {
-        return ugen.getConnections();
+        return null;
     }
 
     @Override

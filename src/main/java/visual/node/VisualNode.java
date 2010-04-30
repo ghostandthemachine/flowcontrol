@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import atom.AtomFloat;
-import compositeNodes.OvertoneNode;
 import dataScene.DataScene;
 import data.DataNode;
 import java.awt.Font;
@@ -27,6 +26,7 @@ import org.netbeans.api.visual.action.WidgetAction.WidgetKeyEvent;
 import org.netbeans.api.visual.action.WidgetAction.WidgetMouseEvent;
 import org.netbeans.api.visual.action.WidgetAction.WidgetMouseWheelEvent;
 import org.netbeans.api.visual.laf.LookFeel;
+import org.netbeans.api.visual.layout.LayoutFactory;
 import org.netbeans.api.visual.model.ObjectState;
 import org.netbeans.api.visual.widget.LabelWidget;
 import org.netbeans.api.visual.widget.Widget;
@@ -64,61 +64,24 @@ public class VisualNode extends Widget {
     protected double lastY;
     protected double xVelocity;
     protected double yVelocity;
+    protected double width = 1;
     public static String UI = "ui";
     public static String DATA = "data";
     protected String type;
     private boolean mouseDragged = false;
-    NodeBorder border = new NodeBorder(borderRadius, 5, 2, new Color(255, 255, 255), new Color(200, 200, 200), 3);
+    NodeBorder border = new NodeBorder(borderRadius, 5, 3, new Color(255, 255, 255), new Color(220, 220, 220), 3);
     private DataNode lastDataNode;
     protected Color fillColor = Color.white;
     protected Color selectedFillColor = Color.lightGray;
     protected Color textColor = Color.BLACK;
     private TestUGen ugen;
 
-    public VisualNode(VisualScene scene, DataScene dScene) {
+    public VisualNode(VisualScene scene) {
         super(scene);
         visualScene = scene;
-        dataScene = dScene;
-        type = VisualNode.DATA;
-        dataNodeCreator = new NodeCreator(dScene, this, visualScene);
-        dataNode = new DataNode("     ", this, dataScene, 1, 1);
-        lastDataNode = dataNode;
         editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
 
-        createLabelWidget(scene);
-        createInputPorts(scene);
-        createOutputPorts(scene);
-
-        scene.addNode(this);
-    }
-
-    public VisualNode(VisualScene scene, DataScene dScene, String label) {
-        super(scene);
-        visualScene = scene;
-        dataScene = dScene;
-        type = UI;
-        dataNodeCreator = new NodeCreator(dScene, this, visualScene);
-        dataNode = dataNodeCreator.createDataNode(label, this);
-        lastDataNode = dataNode;
-        editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
-
-
-        createLabelWidget(scene);
-        createInputPorts(scene);
-        createOutputPorts(scene);
-
-        scene.addNode(this);
-    }
-
-    public VisualNode(VisualScene scene, DataScene dScene, OvertoneNode ugen) {
-        super(scene);
-        visualScene = scene;
-        dataScene = dScene;
-        type = UI;
-        dataNodeCreator = new NodeCreator(dScene, this, visualScene);
-        //   dataNode = dataNodeCreator.createDataNode(ugen, this);
-        lastDataNode = dataNode;
-        editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
+        this.setLayout(LayoutFactory.createAbsoluteLayout());
 
         createLabelWidget(scene);
         createInputPorts(scene);
@@ -142,7 +105,6 @@ public class VisualNode extends Widget {
 
     private void createOutputPorts(VisualScene scene) {
         outputPorts = new PortGroup(scene, this, numOutputs, PortType.OUTPUT);
-        outputPorts.setPreferredLocation(new Point(0, 0));
         addChild(outputPorts);
         outputPorts.bringToFront();
     }
@@ -162,6 +124,8 @@ public class VisualNode extends Widget {
         labelWidget.setFont(new Font("verdana", Font.BOLD, 13));
         labelWidget.getActions().addAction(editorAction);
         labelWidget.setLabel("            ");
+        labelWidget.getActions().addAction(ActionFactory.createResizeAction());
+        System.out.println(labelWidget.getBounds());
         labelWidget.setPreferredLocation(new Point(borderRadius / 2, 0));
 
         addChild(labelWidget);
@@ -253,19 +217,23 @@ public class VisualNode extends Widget {
         removeChild(outputPorts);
         removeChild(labelWidget);
 
+        labelWidget.setLabel(source.getName());
+        addChild(labelWidget);
+
+        width = labelWidget.getBounds().getHeight();
+
         numInputs = source.numInputs();
         numOutputs = source.numOutputs();
 
         inputPorts = new PortGroup(visualScene, this, numInputs, PortType.INPUT);
-        inputPorts.setPreferredLocation(new Point(0, -22));
+        inputPorts.setPreferredLocation(new Point(borderRadius/2, -22));
         addChild(inputPorts);
 
         outputPorts = new PortGroup(visualScene, this, numOutputs, PortType.OUTPUT);
-        outputPorts.setPreferredLocation(new Point(0, 0));
+        outputPorts.setPreferredLocation(new Point(borderRadius/2, -2));
         addChild(outputPorts);
 
-        labelWidget.setLabel(source.getName());
-        addChild(labelWidget);
+
 
         if (numOutputs > 0) {
             outputPorts.setSapcing((int) (50 / (numOutputs * 6)));
@@ -409,12 +377,19 @@ public class VisualNode extends Widget {
     }
 
     public void createNewIUGenNode(IUGenInfo info) {
-        if(info != null) {
-        this.ugen = new TestUGen(info);
-        this.setParameters(ugen);
+        if (info != null) {
+            this.ugen = new TestUGen(info);
+            this.setParameters(ugen);
         } else {
             System.out.println("that is not a valid ugen");
         }
+    }
+
+    int getWidith() {
+        if (labelWidget.getBounds() != null) {
+            return (int) this.getBounds().getWidth();
+        }
+        return (int) width;
     }
 
     private class LabelTextFieldEditor implements TextFieldInplaceEditor {
@@ -423,7 +398,6 @@ public class VisualNode extends Widget {
 
         public LabelTextFieldEditor(VisualNode n) {
             node = n;
-
         }
 
         @Override
@@ -447,7 +421,7 @@ public class VisualNode extends Widget {
                 createNewIUGenNode((IUGenInfo) visualScene.getTrie().searchExact(text));
             } catch (java.lang.ClassCastException e) {
                 Trie trie = (Trie) visualScene.getTrie().getTrieFor(text);
-              //  trie.searchExact(text)
+                //  trie.searchExact(text)
                 System.out.println(trie.contents());
             }
             //VisualNode newNode = (VisualNode) widget.getParentWidget();
@@ -499,6 +473,11 @@ public class VisualNode extends Widget {
 
     public void mouseMoved(Widget widget, WidgetMouseEvent wme) {
         updateUI();
+//        if(wme.getPoint().x > labelWidget.getBounds().getWidth() - borderRadius/2){
+//            this.getActions().addAction(ActionFactory.createResizeAction());
+//        } else {
+//            labelWid.getActions().removeAction(ActionFactory.createResizeAction());
+//        }
     }
 
     public void mouseWheelMoved(Widget widget, WidgetMouseWheelEvent wmwe) {

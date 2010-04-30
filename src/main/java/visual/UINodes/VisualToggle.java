@@ -20,7 +20,7 @@ public class VisualToggle extends VisualNode {
     private Color toggleColor = Color.black;
 
     public VisualToggle(VisualScene parentScene, DataScene dataScene) {
-               super(parentScene, dataScene);
+               super(parentScene);
     }
 
     @Override

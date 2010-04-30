@@ -5,7 +5,10 @@
 package visual.test;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
 import javax.swing.JFrame;
+import overtoneinterface.IUGenInfo;
+import overtoneinterface.TestUGenInfo;
 import visual.scene.FlowControl;
 
 /**
@@ -25,6 +28,7 @@ public class Main {
     }
 
     public Main() {
+  
 
     }
 }

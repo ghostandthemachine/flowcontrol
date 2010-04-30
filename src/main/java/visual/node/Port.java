@@ -5,6 +5,7 @@
 package visual.node;
 
 import java.awt.Color;
+import java.awt.Point;
 import visual.node.PortGroup.PortType;
 import visual.scene.VisualScene;
 import org.netbeans.api.visual.widget.Widget;
@@ -20,40 +21,40 @@ public class Port extends Widget {
     private Color portPaint = Color.red;
     private boolean isInput = false;
     private boolean isOutput = true;
-    PortLine line;
-    PortInteractor highlight;
+    PortInteractor portGraphics;
     private PortType portType;
     private VisualNode parentNode;
     private int id;
 
-    public Port(VisualScene parentScene,VisualNode parent, int s, PortType type, int ID) {
+    public Port(VisualScene parentScene, VisualNode parent, int s, PortType type, int ID) {
         super(parentScene);
         id = ID;
         portType = type;
         size = s;
-        line = new PortLine(parentScene, size);
-        highlight = new PortInteractor(parentScene, size, portType, parent, ID);
         parentNode = parent;
-        addChild(line);
-        addChild(highlight);
+
+        portGraphics = new PortInteractor(parentScene, size, portType, parent, ID);
+
+        addChild(portGraphics);
     }
 
     public PortInteractor getPortInteractor() {
-        return highlight;
+        return portGraphics;
     }
-    public int getID(){
+
+    public int getID() {
         return id;
     }
 
-    public boolean isInput(){
+    public boolean isInput() {
         return isInput;
     }
 
-    public PortType getPortType(){
+    public PortType getPortType() {
         return portType;
     }
 
-    public boolean isOutput(){
+    public boolean isOutput() {
         return isOutput;
     }
 
@@ -86,8 +87,7 @@ public class Port extends Widget {
     }
 
     void removeHoverActions() {
-        highlight.removeHoverActions();
+        portGraphics.removeHoverActions();
         System.out.println("hover port off");
     }
-
 }

@@ -6,8 +6,6 @@
 package visual.node;
 
 import dataScene.DataScene;
-import data.DataNode;
-import visual.node.VisualNode;
 import visual.scene.VisualScene;
 
 /**
@@ -17,8 +15,8 @@ import visual.scene.VisualScene;
 public class DeadNode extends VisualNode{
 
     public DeadNode(VisualNode parent, DataScene dataScene) {
-        super((VisualScene) parent.getModelScene(), dataScene);
-        this.setDataNode(new DataNode(parent, dataScene));
+        super((VisualScene) parent.getModelScene());
+//        this.setDataNode(new DataNode(parent, dataScene));
 
     }
 

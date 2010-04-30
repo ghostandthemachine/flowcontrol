@@ -58,7 +58,7 @@ public class PortInteractor extends Widget {
         }
 
         getActions().addAction(parentScene.getHoverAction());
-        this.setForeground(new Color(0,0,0,0));
+        this.setForeground(new Color(0, 0, 0, 0));
     }
 
     @Override
@@ -69,15 +69,22 @@ public class PortInteractor extends Widget {
     @Override
     protected void paintWidget() {
         Graphics2D g = getGraphics();
+
+        //draw line
+        g.setColor(Color.black);
         g.setStroke(new BasicStroke(2f));
-        if(over) {
-           g.setColor(highlightColor);
+        g.drawLine(-size + (size / 3), 0, size - (size / 3), 0);
+
+        if (over) {
+            g.setColor(highlightColor);
         } else {
-            g.setColor(new Color(0,0,0,0));
+            g.setColor(new Color(0, 0, 0, 0));
         }
 
         g.drawOval(-size, -size, 2 * size, 2 * size);
         g.setStroke(new BasicStroke(1f));
+        this.revalidate();
+
     }
 
     public void setOver(boolean b) {
@@ -133,7 +140,7 @@ public class PortInteractor extends Widget {
         @Override
         public ConnectorState isTargetWidget(Widget sourceWidget, Widget targetWidget) {
             //if tgt is an input, and is not from the same node then resolve
-            if (parentScene.isInput(targetWidget) && (sourceWidget.getParentWidget().getParentWidget().getParentWidget() !=  targetWidget.getParentWidget().getParentWidget().getParentWidget())) {
+            if (parentScene.isInput(targetWidget) && (sourceWidget.getParentWidget().getParentWidget().getParentWidget() != targetWidget.getParentWidget().getParentWidget().getParentWidget())) {
                 return ConnectorState.ACCEPT;
             }
             return ConnectorState.REJECT_AND_STOP;

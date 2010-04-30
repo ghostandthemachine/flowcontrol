@@ -22,7 +22,7 @@ import org.netbeans.api.visual.widget.Widget;
 public class UINode extends VisualNode {
 
     public UINode(VisualScene scene, DataScene ds) {
-        super(scene, ds);
+        super(scene);
         this.setType(UI);
     }
 

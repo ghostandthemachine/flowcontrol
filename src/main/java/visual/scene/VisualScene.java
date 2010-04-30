@@ -42,7 +42,6 @@ import org.netbeans.api.visual.widget.general.IconNodeWidget;
 import overtoneinterface.IUGen;
 import overtoneinterface.IUGenConnection;
 import overtoneinterface.IUGenInfo;
-import overtoneinterface.TestUGenInfo;
 import trie.Trie;
 import visual.node.CustomRouterFactory;
 import visual.node.FlowControlPointShape;
@@ -105,21 +104,6 @@ public class VisualScene extends GraphScene {
         getActions().addAction(ActionFactory.createRectangularSelectAction(this, backgroundLayer));
 
         getPriorActions().addAction(new KeyEventAction());  //add the scene key event listener
-
-        //
-        //create test ugens
-        ArrayList<IUGenInfo> ugen = new ArrayList<IUGenInfo>() {};
-
-        TestUGenInfo ugen0 = new TestUGenInfo("test0", 500, 2, 2);
-        TestUGenInfo ugen1 = new TestUGenInfo("shitty", 500, 2, 2);
-        TestUGenInfo ugen2 = new TestUGenInfo("addition", 500, 2, 2);
-        TestUGenInfo ugen3 = new TestUGenInfo("add", 500, 2, 2);
-        ugen.add(ugen0);
-        ugen.add(ugen1);
-        ugen.add(ugen2);
-        ugen.add(ugen3);
-
-        addIUGenInfo(ugen);
     }
 
     public Trie getTrie() {
@@ -321,7 +305,7 @@ public class VisualScene extends GraphScene {
         Port tgtPort = (Port) connection.getTargetAnchor().getRelatedWidget().getParentWidget();
         VisualNode tgt = tgtPort.getParentNode();
 
-        dataScene.connect(src.getDataNode(), srcPort.getID(), tgt.getDataNode(), tgtPort.getID());
+//        dataScene.connect(src.getDataNode(), srcPort.getID(), tgt.getDataNode(), tgtPort.getID());
 
         return connection;
     }
@@ -346,7 +330,7 @@ public class VisualScene extends GraphScene {
         connection.setTargetAnchor(AnchorFactory.createCircularAnchor(tgt, 2));
         addEdge(connection);
         //create data connection
-        dataScene.connect(source.getDataNode(), sourcePort, target.getDataNode(), targetPort);
+//        dataScene.connect(source.getDataNode(), sourcePort, target.getDataNode(), targetPort);
         //save one for each so that they connections can be accessed in both directions
         connections.add(new Connection(source, sourcePort, target, targetPort, connection));
     }
@@ -369,7 +353,7 @@ public class VisualScene extends GraphScene {
             if (connection.getSource() == node || connection.getTarget() == node) {
                 toRemove.add(connection);
                 //if the data scene has any connections using this node, remove them
-                dataScene.removeConnection(dataScene.getConnections(node.getDataNode()));
+//                dataScene.removeConnection(dataScene.getConnections(node.getDataNode()));
                 this.removeEdge(connection.getConnectionWidget());
             }
         }
@@ -591,7 +575,7 @@ public class VisualScene extends GraphScene {
             VisualScene scene = (VisualScene) widget;
             System.out.println(event.getModifiers());
             if (event.getKeyCode() == KeyEvent.VK_N) {      //type 'n' to create a new object
-                VisualNode node = new VisualNode(scene.getModelScene(), scene.getDataScene());
+                VisualNode node = new VisualNode(scene.getModelScene());
                 node.setPreferredLocation(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
                 scene.setLastPointCreatedAt(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
                 scene.addNode(node);
@@ -689,7 +673,7 @@ public class VisualScene extends GraphScene {
          */
         for (int i = 0; i < ugens.length; i++) {
             IUGen ugen = ugens[i];
-            VisualNode visualNode = new VisualNode(this, dataScene, ugen);
+            VisualNode visualNode = new VisualNode(this);
             int tx = 50;
             int ty = i * 40;
             visualNode.setPreferredLocation(new Point(tx, ty));
@@ -727,15 +711,18 @@ public class VisualScene extends GraphScene {
      *
      * @param ugens - an array of IUGenInfo objects sent from overtone/supercollider
      */
-    public void addIUGenInfo(ArrayList<IUGenInfo> info) {
-        for (Iterator i = info.iterator(); i.hasNext();) {
-            try {
-                IUGenInfo ugenInfo = (IUGenInfo) i.next();
-                trie.insert(ugenInfo.getName(), ugenInfo);
-            } catch (NonUniqueKeyException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (BadKeyException ex) {
-                Exceptions.printStackTrace(ex);
+    public void addIUGenInfo(Collection<IUGenInfo> info) {
+        System.out.println(info.size());
+        if (info != null) {
+            for (Iterator i = info.iterator(); i.hasNext();) {
+                try {
+                    IUGenInfo ugenInfo = (IUGenInfo) i.next();
+                    trie.insert(ugenInfo.getName(), ugenInfo);
+                } catch (NonUniqueKeyException ex) {
+                    Exceptions.printStackTrace(ex);
+                } catch (BadKeyException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
         }
     }

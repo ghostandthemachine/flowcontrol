@@ -4,14 +4,11 @@
  */
 package visual.test;
 
-import java.awt.BorderLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
 import java.net.URL;
-import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -65,7 +62,7 @@ class ToolBar extends JToolBar {
         button.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent ae) {
-                VisualNode node = new VisualNode(modelScene.getModelScene(), modelScene.getDataScene());
+                VisualNode node = new VisualNode(modelScene.getModelScene());
                 node.setPreferredLocation(new Point(400,400));
                 modelScene.addNode(node);
                 System.out.println(modelScene.getFocusedWidget());

@@ -17,7 +17,7 @@ import visual.scene.VisualScene;
 public class CustomNode extends VisualNode{
 
        public CustomNode(VisualScene scene, DataScene dScene) {
-        super(scene, dScene);
+        super(scene);
 }
 
     @Override

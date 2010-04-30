@@ -16,7 +16,7 @@ import visual.scene.VisualScene;
 public class DeadNode extends VisualNode {
 
     public DeadNode(VisualScene s, DataScene ds, String name) {
-        super(s, ds, name);
+        super(s);
         
         this.setBackground(Color.gray);
     }

@@ -38,7 +38,7 @@ import visual.scene.Connection;
 
 /**
  *
- * @author Jon
+ * @author Jon Rose
  */
 public class VisualNode extends Widget {
 
@@ -69,7 +69,7 @@ public class VisualNode extends Widget {
     public static String DATA = "data";
     protected String type;
     private boolean mouseDragged = false;
-    NodeBorder border = new NodeBorder(borderRadius, 5, 3, new Color(255, 255, 255), new Color(220, 220, 220), 3);
+    NodeBorder border = new NodeBorder(borderRadius, 5, 3, new Color(255, 255, 255), new Color(250, 250, 250), 3);
     private DataNode lastDataNode;
     protected Color fillColor = Color.white;
     protected Color selectedFillColor = Color.lightGray;
@@ -100,7 +100,7 @@ public class VisualNode extends Widget {
         LookFeel lookFeel = getScene().getLookFeel();
         labelWidget.setBorder(border);
         labelWidget.setForeground(state.isSelected() ? Color.black : Color.black);
-        border.setFill(state.isSelected() ? Color.lightGray : Color.white);
+        border.setFill(state.isSelected() ? new Color(200, 200, 200) : Color.white);
     }
 
     private void createOutputPorts(VisualScene scene) {
@@ -153,7 +153,7 @@ public class VisualNode extends Widget {
      * @param string
      */
     public void setToolTip(String string) {
-        this.setToolTip(string);
+        this.setToolTipText(string);
     }
 
     public void setLabel(String s) {
@@ -204,15 +204,8 @@ public class VisualNode extends Widget {
         labelWidget.isEnabled();
     }
 
-    @Override
-    public void paintWidget() {
-        updateModel();
-        super.paintBackground();
-        Graphics2D g = getGraphics();
-    }
-
     public void setParameters(IUGen source) {
-        //   visualScene.removeNode(this);
+        visualScene.removeNode(this);
         removeChild(inputPorts);
         removeChild(outputPorts);
         removeChild(labelWidget);
@@ -226,21 +219,19 @@ public class VisualNode extends Widget {
         numOutputs = source.numOutputs();
 
         inputPorts = new PortGroup(visualScene, this, numInputs, PortType.INPUT);
-        inputPorts.setPreferredLocation(new Point(borderRadius/2, -22));
+        inputPorts.setPreferredLocation(new Point(borderRadius / 2, -16));
         addChild(inputPorts);
 
         outputPorts = new PortGroup(visualScene, this, numOutputs, PortType.OUTPUT);
-        outputPorts.setPreferredLocation(new Point(borderRadius/2, -2));
+        outputPorts.setPreferredLocation(new Point(borderRadius / 2, 4));
         addChild(outputPorts);
 
-
-
-        if (numOutputs > 0) {
-            outputPorts.setSapcing((int) (50 / (numOutputs * 6)));
-        }
-        if (numInputs > 0) {
-            inputPorts.setSapcing((int) (50 / (numInputs * 6)));
-        }
+//        if (numOutputs > 0) {
+//            outputPorts.setSapcing((int) (50 / (numOutputs * 6)));
+//        }
+//        if (numInputs > 0) {
+//            inputPorts.setSapcing((int) (50 / (numInputs * 6)));
+//        }
 
         visualScene.getModelScene().addNode(this);
     }
@@ -380,6 +371,7 @@ public class VisualNode extends Widget {
         if (info != null) {
             this.ugen = new TestUGen(info);
             this.setParameters(ugen);
+            this.setToolTip(info.getDoc());
         } else {
             System.out.println("that is not a valid ugen");
         }
@@ -414,7 +406,6 @@ public class VisualNode extends Widget {
         public void setText(Widget widget, String text) {
             LabelWidget label = (LabelWidget) widget;
             label.setLabel(text);
-            System.out.println(visualScene.getTrie());
 
             try {
                 //Trie returns the object if there is a single match, otherwisr it returns a tri of elements

@@ -63,7 +63,7 @@ public class PortInteractor extends Widget {
 
     @Override
     protected Rectangle calculateClientArea() {
-        return new Rectangle(-size, -size, 2 * size + 1, 2 * size + 1);
+        return new Rectangle(-size / 2, -size, size * 2 + 1, size * 2 + 1);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class PortInteractor extends Widget {
         //draw line
         g.setColor(Color.black);
         g.setStroke(new BasicStroke(2f));
-        g.drawLine(-size + (size / 3), 0, size - (size / 3), 0);
+        g.drawLine(0, 0, size, 0);
 
         if (over) {
             g.setColor(highlightColor);
@@ -81,7 +81,7 @@ public class PortInteractor extends Widget {
             g.setColor(new Color(0, 0, 0, 0));
         }
 
-        g.drawOval(-size, -size, 2 * size, 2 * size);
+        g.drawOval(-size / 2, -size, size * 2, size * 2);
         g.setStroke(new BasicStroke(1f));
         this.revalidate();
 

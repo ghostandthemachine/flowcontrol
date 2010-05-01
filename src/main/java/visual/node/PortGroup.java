@@ -40,36 +40,32 @@ public class PortGroup extends Widget {
         portType = type;
         this.setLayout(LayoutFactory.createAbsoluteLayout());
 
-        int tempNodeWidth = node.getWidith() - node.borderRadius;
+        int tempNodeWidth = (node.getWidith() - node.borderRadius * 2);
 
         if (nPorts > 0) {
-            switch (portType) {
-                case INPUT:
-                    portSize = tempNodeWidth / node.getNumInputs();
-                    portSize /= 2;
-
-                case OUTPUT:
-                    portSize = tempNodeWidth / node.getNumOutputs();
-                    portSize /= 2;
+            if (portType.equals(PortType.INPUT)) {
+                portSize = (tempNodeWidth / node.getNumInputs()) / 2;
+            } else if (portType.equals(PortType.OUTPUT)) {
+                portSize = (tempNodeWidth / node.getNumOutputs()) / 2;
             }
             if (nPorts > 1) {
-                spacing = tempNodeWidth - portSize;
-                spacing /= nPorts - 1;
+                spacing = (tempNodeWidth - portSize) / (nPorts - 1);
             } else {
                 spacing = 10;
             }
             portSize = Tools.constrain(portSize, 2, 6);
         }
-
-        System.out.println(portSize + "   " + spacing);
         buildPorts();
-
     }
 
     public void buildPorts() {
         for (int i = 0; i < nPorts; i++) {
             Port port = new Port(visualScene, node, portSize, portType, i);
+            if(i != 0) {
             port.setPreferredLocation(new Point(i * spacing, 0));
+            } else {
+                 port.setPreferredLocation(new Point(i * spacing, 0));
+            }
             ports.add(port);
             this.addChild(port);
         }

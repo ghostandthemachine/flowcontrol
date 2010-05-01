@@ -36,6 +36,7 @@ public class Port extends Widget {
         portGraphics = new PortInteractor(parentScene, size, portType, parent, ID);
 
         addChild(portGraphics);
+        revalidate();
     }
 
     public PortInteractor getPortInteractor() {

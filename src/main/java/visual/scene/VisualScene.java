@@ -568,7 +568,7 @@ public class VisualScene extends GraphScene {
         }
     }
 
-    private static final class KeyEventAction extends WidgetAction.Adapter {
+    private final class KeyEventAction extends WidgetAction.Adapter {
 
         @Override
         public State keyPressed(Widget widget, WidgetKeyEvent event) {
@@ -592,8 +592,6 @@ public class VisualScene extends GraphScene {
             if (event.isAltDown() && event.getKeyCode() == KeyEvent.VK_A) {    //alt + 'a' for align mode toggle
                 scene.setAlignMode();
                 scene.removeHoverActions();
-
-                System.out.println(scene.getSelectedObjects().toString());
             }
 
             if (event.isAltDown() && event.getKeyCode() == KeyEvent.VK_E) {    //alt + 'e' for edit/use mode toggle
@@ -608,6 +606,55 @@ public class VisualScene extends GraphScene {
                 scene.unrouteSelectedEdges();
             }
 
+            ////use arrows to move selected objects
+
+            if (getSelectedObjects().size() > 0) {
+                Set array = getSelectedObjects();
+                if (event.getKeyCode() == KeyEvent.VK_UP) {
+                    for (Iterator i = array.iterator(); i.hasNext();) {
+                        try {
+                            VisualNode node = (VisualNode) i.next();
+                            node.setPreferredLocation(new Point(node.getPreferredLocation().x, node.getPreferredLocation().y - 2));
+                            System.out.println("up");
+                        } catch (java.lang.ClassCastException e) {
+                        }
+                    }
+                }
+
+                if (event.getKeyCode() == KeyEvent.VK_DOWN) {
+                    for (Iterator i = array.iterator(); i.hasNext();) {
+                        try {
+                            VisualNode node = (VisualNode) i.next();
+                            System.out.println("down");
+                            node.setPreferredLocation(new Point(node.getPreferredLocation().x, node.getPreferredLocation().y + 2));
+                        } catch (java.lang.ClassCastException e) {
+                        }
+                    }
+                }
+
+                if (event.getKeyCode() == KeyEvent.VK_LEFT) {
+                    for (Iterator i = array.iterator(); i.hasNext();) {
+                        try {
+                            VisualNode node = (VisualNode) i.next();
+                            System.out.println("left");
+                            node.setPreferredLocation(new Point(node.getPreferredLocation().x - 2, node.getPreferredLocation().y));
+                        } catch (java.lang.ClassCastException e) {
+                        }
+                    }
+                }
+
+                if (event.getKeyCode() == KeyEvent.VK_RIGHT) {
+                    for (Iterator i = array.iterator(); i.hasNext();) {
+                        try {
+                            VisualNode node = (VisualNode) i.next();
+                            System.out.println("right");
+                            node.setPreferredLocation(new Point(node.getPreferredLocation().x + 2, node.getPreferredLocation().y));
+                        } catch (java.lang.ClassCastException e) {
+                        }
+                    }
+                }
+
+            }
 
             if (event.getKeyCode() == KeyEvent.VK_E) {
                 widget.getScene().setActiveTool(EDGE_CONTROL_MODE);
@@ -656,53 +703,6 @@ public class VisualScene extends GraphScene {
                 widget.setForeground(Color.yellow);
                 PortInteractor port = (PortInteractor) widget;
                 port.setOver(true);
-            }
-        }
-    }
-
-    /**
-     *
-     * @param ugens - an array of IUGenInfo objects sent from overtone/supercollider
-     */
-    public void setUGens(IUGen[] ugens) {
-
-        //  VisualNode[] reffNodes = new VisualNode[ugens.length];
-        Hashtable newNodes = new Hashtable();
-        /*
-         * create the nodes before connecting them
-         */
-        for (int i = 0; i < ugens.length; i++) {
-            IUGen ugen = ugens[i];
-            VisualNode visualNode = new VisualNode(this);
-            int tx = 50;
-            int ty = i * 40;
-            visualNode.setPreferredLocation(new Point(tx, ty));
-
-            //  reffNodes[i] = visualNode;
-            newNodes.put(ugen, visualNode);
-
-            this.createNode(visualNode);
-        }
-
-        /*
-         * connect the nodes based on the IUGenInfo object
-         */
-        for (int i = 0; i < ugens.length; i++) {
-            VisualNode sourceNode = (VisualNode) newNodes.get(ugens[i]);
-            IUGenConnection[] nodeConnections = ugens[i].getConnections();
-            if (nodeConnections.length > 0) {
-                for (int j = 0; j < nodeConnections.length; j++) {
-
-                    IUGenConnection connection = nodeConnections[j];
-                    IUGen target = connection.getTarget();
-
-                    VisualNode targetNode = (VisualNode) newNodes.get(target);
-
-                    int sourcePortId = connection.getSourcePortNumber();
-                    int targetPortId = connection.getTargetPortNumber();
-
-                    this.connect(sourceNode, sourcePortId, targetNode, targetPortId);
-                }
             }
         }
     }

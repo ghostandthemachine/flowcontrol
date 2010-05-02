@@ -2,10 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package visual.scene;
 
+import GroupNode.BorderPortTestNode;
 import org.netbeans.api.visual.widget.ConnectionWidget;
+import org.netbeans.api.visual.widget.Widget;
 import visual.node.VisualNode;
 
 /**
@@ -14,8 +15,8 @@ import visual.node.VisualNode;
  */
 public class Connection {
 
-    VisualNode source;
-    VisualNode target;
+    Widget source;
+    Widget target;
     int sourcePort;
     int targetPort;
     ConnectionWidget connection;
@@ -29,7 +30,15 @@ public class Connection {
         this.connection = connection;
     }
 
-    public VisualNode getSource() {
+    Connection(BorderPortTestNode source, int sourcePort, BorderPortTestNode target, int targetPort, ConnectionWidget connection) {
+        this.source = source;
+        this.target = target;
+        this.sourcePort = sourcePort;
+        this.targetPort = targetPort;
+        this.connection = connection;
+    }
+
+    public Widget getSource() {
         return source;
     }
 
@@ -37,7 +46,7 @@ public class Connection {
         return sourcePort;
     }
 
-    public VisualNode getTarget() {
+    public Widget getTarget() {
         return target;
     }
 
@@ -48,5 +57,4 @@ public class Connection {
     public ConnectionWidget getConnectionWidget() {
         return connection;
     }
-
 }

@@ -13,14 +13,16 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import org.openide.util.ImageUtilities;
 import visual.node.VisualNode;
+import visual.scene.VisualScene;
 import visual.scene.VisualScene;
 
 /**
  *
  * @author jon
  */
-class ToolBar extends JToolBar {
+public class ToolBar extends JToolBar {
 
     public static String EDIT_MODE = "editMode";
     public static String ALIGN_MODE = "alignMode";
@@ -63,7 +65,7 @@ class ToolBar extends JToolBar {
 
             public void actionPerformed(ActionEvent ae) {
                 VisualNode node = new VisualNode(modelScene.getModelScene());
-                node.setPreferredLocation(new Point(400,400));
+                node.setPreferredLocation(new Point(400, 400));
                 modelScene.addNode(node);
                 System.out.println(modelScene.getFocusedWidget());
                 parentPanel.grabFocus();
@@ -91,11 +93,13 @@ class ToolBar extends JToolBar {
     }
 
     protected JButton makeImageButton(String imageName, String action, String tooltip, String alt) {
+
         String imgLocation = "images/"
                 + imageName
                 + ".gif";
-        URL imageURL = ToolBar.class.getResource(imgLocation);
-        System.out.println(imageURL);
+        System.out.println(imgLocation);
+
+      //  URL imageURL = ToolBar.class.getResource(imgLocation);
 
 
 
@@ -104,7 +108,7 @@ class ToolBar extends JToolBar {
         button.setToolTipText(tooltip);
         //    button.addActionListener(this);
 
-        button.setIcon(new ImageIcon(imageURL, alt));
+        button.setIcon(new ImageIcon(ImageUtilities.loadImage(imgLocation)));
 
         return button;
     }

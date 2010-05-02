@@ -4,6 +4,9 @@
  */
 package visual.scene;
 
+import GroupNode.BorderPortTestNode;
+import GroupNode.CustomPortInteractor;
+import GroupNode.GroupNode;
 import org.openide.util.Exceptions;
 import trie.BadKeyException;
 import trie.NonUniqueKeyException;
@@ -17,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import dataScene.DataScene;
 import java.util.Collection;
-import java.util.Hashtable;
 import java.util.Iterator;
 import visual.UINodes.FloatDisplay;
 import visual.node.VisualNode;
@@ -39,8 +41,6 @@ import org.netbeans.api.visual.widget.LayerWidget;
 import org.netbeans.api.visual.widget.Scene;
 import org.netbeans.api.visual.widget.Widget;
 import org.netbeans.api.visual.widget.general.IconNodeWidget;
-import overtoneinterface.IUGen;
-import overtoneinterface.IUGenConnection;
 import overtoneinterface.IUGenInfo;
 import trie.Trie;
 import visual.node.CustomRouterFactory;
@@ -104,6 +104,10 @@ public class VisualScene extends GraphScene {
         getActions().addAction(ActionFactory.createRectangularSelectAction(this, backgroundLayer));
 
         getPriorActions().addAction(new KeyEventAction());  //add the scene key event listener
+
+        BorderPortTestNode gnode = new BorderPortTestNode(this);
+        gnode.setPreferredLocation(new Point(100, 100));
+        this.addChild(gnode);
     }
 
     public Trie getTrie() {
@@ -227,7 +231,15 @@ public class VisualScene extends GraphScene {
         inputs.add(input);
     }
 
+    public void addInputConnection(CustomPortInteractor input) {
+        inputs.add(input);
+    }
+
     public void addOutputConnection(PortInteractor output) {
+        outputs.add(output);
+    }
+
+    public void addOutputConnection(CustomPortInteractor output) {
         outputs.add(output);
     }
 
@@ -267,10 +279,7 @@ public class VisualScene extends GraphScene {
     protected Widget attachNodeWidget(Object n) {
         Widget widget = (Widget) n;
         widget.setToolTipText("flow node");
-        VisualNode node = (VisualNode) n;
-
         widget.createActions(USE).addAction(0, dragAction);
-
         widget.createActions(EDIT).addAction(0, createSelectAction());
         widget.createActions(EDIT).addAction(1, multiMove);
         widget.createActions(EDIT).addAction(2, ActionFactory.createResizeAction());
@@ -333,6 +342,32 @@ public class VisualScene extends GraphScene {
 //        dataScene.connect(source.getDataNode(), sourcePort, target.getDataNode(), targetPort);
         //save one for each so that they connections can be accessed in both directions
         connections.add(new Connection(source, sourcePort, target, targetPort, connection));
+    }
+
+    /*
+     * for use with CustomBorderPort testing
+     */
+    private void connect(BorderPortTestNode source, int sourcePort, BorderPortTestNode target, int targetPort) {
+        ConnectionWidget connection = new ConnectionWidget(this);
+        Widget src = source.getOutputPort(sourcePort);
+        Widget tgt = target.getInputPort(targetPort);
+        connection.setSourceAnchor(AnchorFactory.createCircularAnchor(src, 2));
+        connection.setTargetAnchor(AnchorFactory.createCircularAnchor(tgt, 2));
+        addEdge(connection);
+        //create data connection
+//        dataScene.connect(source.getDataNode(), sourcePort, target.getDataNode(), targetPort);
+        //save one for each so that they connections can be accessed in both directions
+        connections.add(new Connection(source, sourcePort, target, targetPort, connection));
+    }
+
+    public void connect(CustomPortInteractor source, CustomPortInteractor target) {
+        ConnectionWidget connection = new ConnectionWidget(this);
+        connection.setSourceAnchor(AnchorFactory.createCircularAnchor(source, 1));
+        connection.setTargetAnchor(AnchorFactory.createCircularAnchor(target, 1));
+
+        //save one for each so that they connections can be accessed in both directions
+        connections.add(new Connection(source.getNode(), source.getPortNumber(), target.getNode(), target.getPortNumber(), connection));
+        addEdge(connection);
     }
 
     public void connect(PortInteractor source, PortInteractor target) {

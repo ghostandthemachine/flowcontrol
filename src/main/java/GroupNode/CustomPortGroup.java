@@ -2,37 +2,38 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package visual.node;
+package GroupNode;
 
 import java.awt.Point;
 import java.util.ArrayList;
 import visual.scene.VisualScene;
 import org.netbeans.api.visual.layout.LayoutFactory;
 import org.netbeans.api.visual.widget.Widget;
+import visual.node.Port;
 import visual.test.Tools;
 
 /**
  *
  * @author Jon
  */
-public class PortGroup extends Widget {
+public class CustomPortGroup extends Widget {
 
     private int nPorts;
     private VisualScene visualScene;
-    private VisualNode node;
+    private BorderPortTestNode node;
     private int portSize;
-    private final PortType portType;
+    private final CustomPortType portType;
     private int spacing = 4;
-    private ArrayList<Port> ports = new ArrayList();
+    private ArrayList<CustomPort> ports = new ArrayList();
 
-    public enum PortType {
+    public enum CustomPortType {
 
         INPUT,
         OUTPUT,
         NULL;
     }
 
-    public PortGroup(VisualNode node, int numPorts, PortType type) {
+    public CustomPortGroup(BorderPortTestNode node, int numPorts, CustomPortType type) {
         super(node.getScene());
         visualScene = (VisualScene) node.getScene();
         this.node = node;
@@ -40,12 +41,12 @@ public class PortGroup extends Widget {
         portType = type;
         this.setLayout(LayoutFactory.createAbsoluteLayout());
 
-        int tempNodeWidth = (node.getWidith() - node.borderRadius * 2);
+        int tempNodeWidth = (node.getWidth() - node.borderRadius * 2);
 
         if (nPorts > 0) {
-            if (portType.equals(PortType.INPUT)) {
+            if (portType.equals(CustomPortType.INPUT)) {
                 portSize = (tempNodeWidth / node.getNumInputs()) / 2;
-            } else if (portType.equals(PortType.OUTPUT)) {
+            } else if (portType.equals(CustomPortType.OUTPUT)) {
                 portSize = (tempNodeWidth / node.getNumOutputs()) / 2;
             }
             if (nPorts > 1) {
@@ -60,7 +61,7 @@ public class PortGroup extends Widget {
 
     public void buildPorts() {
         for (int i = 0; i < nPorts; i++) {
-            Port port = new Port(visualScene, node, portSize, portType, i);
+            CustomPort port = new CustomPort(node, portSize, portType, i);
             if (i != 0) {
                 port.setPreferredLocation(new Point(i * spacing, 0));
             } else {
@@ -79,7 +80,7 @@ public class PortGroup extends Widget {
 
     public void removeHoverActions() {
         for (int i = 0; i < ports.size() - 1; i++) {
-            Port port = ports.get(i);
+            CustomPort port = ports.get(i);
             port.removeHoverActions();
             System.out.println("hover group off");
         }

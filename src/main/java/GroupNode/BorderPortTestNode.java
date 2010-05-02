@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package visual.node;
+package GroupNode;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -11,9 +11,7 @@ import atom.AtomFloat;
 import dataScene.DataScene;
 import data.DataNode;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.util.ArrayList;
-import visual.node.PortGroup.PortType;
 import visual.scene.VisualScene;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.action.TextFieldInplaceEditor;
@@ -34,19 +32,20 @@ import overtoneinterface.IUGen;
 import overtoneinterface.IUGenInfo;
 import overtoneinterface.TestUGen;
 import trie.Trie;
+import visual.UINodes.NodeMenu;
+import visual.node.NodeCreator;
+import visual.node.UINode;
 import visual.scene.Connection;
 
 /**
  *
  * @author Jon Rose
  */
-public class VisualNode extends Widget {
+public class BorderPortTestNode extends Widget {
 
     private WidgetAction editorAction;
     protected LabelWidget labelWidget;
     LookFeel lookFeel = getScene().getLookFeel();
-    PortGroup outputPorts;
-    PortGroup inputPorts;
     protected int numInputs = 0;
     protected int numOutputs = 0;
     protected int portWidth;
@@ -69,24 +68,20 @@ public class VisualNode extends Widget {
     public static String DATA = "data";
     protected String type;
     private boolean mouseDragged = false;
-    NodeBorder border;
+    PortBorder portBorder;
     private DataNode lastDataNode;
     protected Color fillColor = Color.white;
     protected Color selectedFillColor = Color.lightGray;
     protected Color textColor = Color.BLACK;
     private TestUGen ugen;
 
-    public VisualNode(VisualScene scene) {
+    public BorderPortTestNode(VisualScene scene) {
         super(scene);
         visualScene = scene;
         editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
 
         this.setLayout(LayoutFactory.createAbsoluteLayout());
-        border  = new NodeBorder(visualScene, borderRadius, 5, 3, new Color(255, 255, 255), new Color(250, 250, 250), 3);
-
         createLabelWidget(scene);
-        createInputPorts(scene);
-        createOutputPorts(scene);
 
         scene.addNode(this);
     }
@@ -99,32 +94,21 @@ public class VisualNode extends Widget {
     @Override
     public void notifyStateChanged(ObjectState previousState, ObjectState state) {
         LookFeel lookFeel = getScene().getLookFeel();
-        labelWidget.setBorder(border);
+        labelWidget.setBorder(portBorder);
         labelWidget.setForeground(state.isSelected() ? Color.black : Color.black);
-        border.setFill(state.isSelected() ? new Color(200, 200, 200) : Color.white);
-    }
-
-    private void createOutputPorts(VisualScene scene) {
-        outputPorts = new PortGroup(this, numOutputs, PortType.OUTPUT);
-        addChild(outputPorts);
-        outputPorts.bringToFront();
-    }
-
-    private void createInputPorts(VisualScene scene) {
-        inputPorts = new PortGroup(this, numInputs, PortType.INPUT);
-        inputPorts.setPreferredLocation(new Point(0, -22));
-        addChild(inputPorts);
-        inputPorts.bringToFront();
+        portBorder.setFill(state.isSelected() ? new Color(200, 200, 200) : Color.white);
     }
 
     private void createLabelWidget(VisualScene scene) {
         this.setBackground(new Color(0, 0, 0, 0));
-        border.setFill(Color.white);
-        border.setDraw(Color.gray);
+
         labelWidget = new LabelWidget(visualScene);
         labelWidget.setFont(new Font("verdana", Font.BOLD, 13));
         labelWidget.getActions().addAction(editorAction);
         labelWidget.setLabel("            ");
+        portBorder = new PortBorder(this, borderRadius, 5, 3, new Color(255, 255, 255), new Color(250, 250, 250), 3);
+        portBorder.setFill(Color.white);
+        portBorder.setDraw(Color.gray);
         labelWidget.getActions().addAction(ActionFactory.createResizeAction());
         System.out.println(labelWidget.getBounds());
         labelWidget.setPreferredLocation(new Point(borderRadius / 2, 0));
@@ -178,19 +162,19 @@ public class VisualNode extends Widget {
     }
 
     public Widget getOutputPort(int i) {
-        return outputPorts.getPort(i);
+        return portBorder.getOutputs().getPort(i);
     }
 
     public Widget getInputPort(int i) {
-        return inputPorts.getPort(i);
+        return portBorder.getInputs().getPort(i);
     }
 
     public void setOutputPortToolTip(int i, String s) {
-        outputPorts.setPortToolTip(i, s);
+        portBorder.getOutputs().setPortToolTip(i, s);
     }
 
     public void setInputPortToolTip(int i, String s) {
-        inputPorts.setPortToolTip(i, s);
+        portBorder.getInputs().setPortToolTip(i, s);
     }
 
     public String getType() {
@@ -206,9 +190,6 @@ public class VisualNode extends Widget {
     }
 
     public void setParameters(IUGen source) {
-        visualScene.removeNode(this);
-        removeChild(inputPorts);
-        removeChild(outputPorts);
         removeChild(labelWidget);
 
         labelWidget.setLabel(source.getName());
@@ -219,20 +200,7 @@ public class VisualNode extends Widget {
         numInputs = source.numInputs();
         numOutputs = source.numOutputs();
 
-        inputPorts = new PortGroup(this, numInputs, PortType.INPUT);
-        inputPorts.setPreferredLocation(new Point(borderRadius / 2, -16));
-        addChild(inputPorts);
-
-        outputPorts = new PortGroup(this, numOutputs, PortType.OUTPUT);
-        outputPorts.setPreferredLocation(new Point(borderRadius / 2, 4));
-        addChild(outputPorts);
-
-//        if (numOutputs > 0) {
-//            outputPorts.setSapcing((int) (50 / (numOutputs * 6)));
-//        }
-//        if (numInputs > 0) {
-//            inputPorts.setSapcing((int) (50 / (numInputs * 6)));
-//        }
+        portBorder.setParameters(this);
 
         visualScene.getModelScene().addNode(this);
     }
@@ -350,7 +318,7 @@ public class VisualNode extends Widget {
     }
 
     public void removeHoverActions() {
-        outputPorts.removeHoverActions();
+        portBorder.getOutputs().removeHoverActions();
         //      System.out.println("hover model node off");
     }
 
@@ -358,8 +326,8 @@ public class VisualNode extends Widget {
         ArrayList<Connection> connections = new ArrayList<Connection>();
         Connection[] conns;
         for (int i = 0; i < visualScene.getConnections().size(); i++) {
-            VisualNode source = (VisualNode) visualScene.getConnections().get(i).getSource();
-            VisualNode target = (VisualNode) visualScene.getConnections().get(i).getTarget();
+            BorderPortTestNode source = (BorderPortTestNode) visualScene.getConnections().get(i).getSource();
+            BorderPortTestNode target = (BorderPortTestNode) visualScene.getConnections().get(i).getTarget();
             if (source.equals(this) || target.equals(this)) {
                 connections.add(visualScene.getConnections().get(i));
             }
@@ -378,7 +346,7 @@ public class VisualNode extends Widget {
         }
     }
 
-    int getWidith() {
+    int getWidth() {
         if (labelWidget.getBounds() != null) {
             return (int) this.getBounds().getWidth();
         }
@@ -387,10 +355,10 @@ public class VisualNode extends Widget {
 
     private class LabelTextFieldEditor implements TextFieldInplaceEditor {
 
-        private VisualNode node;
+        private BorderPortTestNode node;
 
-        public LabelTextFieldEditor(VisualNode n) {
-            node = n;
+        private LabelTextFieldEditor(BorderPortTestNode customNode) {
+            node = customNode;
         }
 
         @Override

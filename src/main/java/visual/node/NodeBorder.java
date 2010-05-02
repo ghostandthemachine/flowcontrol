@@ -48,11 +48,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import org.netbeans.api.visual.widget.ResourceTable;
 import org.netbeans.api.visual.widget.Widget;
+import visual.scene.VisualScene;
 
 /**
  * @author David Kaspar
  */
-public final class NodeBorder implements Border {
+public class NodeBorder extends Widget implements Border {
 
     private int arcWidth;
     private int arcHeight;
@@ -64,7 +65,8 @@ public final class NodeBorder implements Border {
     private FillResourceTableListener fillListener = null;
     private float thickness;
 
-    public NodeBorder (int arc, int insetWidth, int insetHeight, Color fillColor, Color drawColor, int thickness) {
+    public NodeBorder(VisualScene scene, int arc, int insetWidth, int insetHeight, Color fillColor, Color drawColor, int thickness) {
+        super(scene);
         this.arcWidth = arc;
         this.arcHeight = arc;
         this.insetWidth = insetWidth;
@@ -74,74 +76,33 @@ public final class NodeBorder implements Border {
         this.thickness = thickness;
     }
 
-    public NodeBorder (int arcWidth, int arcHeight, int insetWidth, int insetHeight,
-                          String fillProperty,  String drawProperty,
-                          Widget assocaited) {
-        this(arcWidth, arcHeight, insetWidth, insetHeight,
-             fillProperty, drawProperty, assocaited.getResourceTable());
+    public Insets getInsets() {
+        return new Insets(insetHeight, insetWidth, insetHeight, insetWidth);
     }
 
-    public NodeBorder (int arcWidth, int arcHeight, int insetWidth, int insetHeight,
-                          String fillProperty,  String drawProperty,
-                          ResourceTable table) {
-        this.arcWidth = arcWidth;
-        this.arcHeight = arcHeight;
-        this.insetWidth = insetWidth;
-        this.insetHeight = insetHeight;
-
-
-        Object value = table.getProperty(fillProperty);
-        System.out.println(fillProperty);
-        if(value instanceof Color)
-        {
-            this.fillColor = (Color)value;
-        }
-
-        value = table.getProperty(drawProperty);
-        if(value instanceof Color)
-        {
-            this.drawColor = (Color)value;
-        }
-
-        drawListener = new DrawResourceTableListener();
-        fillListener = new FillResourceTableListener();
-        table.addPropertyChangeListener(fillProperty, fillListener);
-        table.addPropertyChangeListener(drawProperty, drawListener);
-    }
-
-    public Insets getInsets () {
-        return new Insets (insetHeight, insetWidth, insetHeight, insetWidth);
-    }
-
-    public void paint (Graphics2D gr, Rectangle bounds) {
+    public void paint(Graphics2D gr, Rectangle bounds) {
         if (fillColor != null) {
-            gr.setColor (fillColor);
-            gr.fill (new RoundRectangle2D.Float (bounds.x, bounds.y, bounds.width, bounds.height, arcWidth, arcHeight));
+            gr.setColor(fillColor);
+            gr.fill(new RoundRectangle2D.Float(bounds.x, bounds.y, bounds.width, bounds.height, arcWidth, arcHeight));
         }
         if (drawColor != null) {
-            gr.setColor (drawColor);
+            gr.setColor(drawColor);
             gr.setStroke(new BasicStroke(thickness));
-            gr.draw (new RoundRectangle2D.Float (bounds.x + thickness/2, bounds.y + thickness/2, bounds.width - thickness, bounds.height - thickness, arcWidth, arcHeight));
+            gr.draw(new RoundRectangle2D.Float(bounds.x + thickness / 2, bounds.y + thickness / 2, bounds.width - thickness, bounds.height - thickness, arcWidth, arcHeight));
         }
     }
 
-    public boolean isOpaque () {
-        return false;
-    }
+    public class DrawResourceTableListener implements PropertyChangeListener {
 
-    public class DrawResourceTableListener implements PropertyChangeListener
-    {
-        public void propertyChange(PropertyChangeEvent event)
-        {
-            drawColor = (Color)event.getNewValue();
+        public void propertyChange(PropertyChangeEvent event) {
+            drawColor = (Color) event.getNewValue();
         }
     }
 
-    public class FillResourceTableListener implements PropertyChangeListener
-    {
-        public void propertyChange(PropertyChangeEvent event)
-        {
-            fillColor = (Color)event.getNewValue();
+    public class FillResourceTableListener implements PropertyChangeListener {
+
+        public void propertyChange(PropertyChangeEvent event) {
+            fillColor = (Color) event.getNewValue();
         }
     }
 
@@ -153,4 +114,6 @@ public final class NodeBorder implements Border {
         drawColor = c;
     }
 
+
+    
 }

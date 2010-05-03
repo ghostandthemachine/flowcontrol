@@ -10,17 +10,11 @@ package overtoneinterface;
  */
 public interface IUGenInfo {
 
-    int getRate();
+    int[] getRates();
 
-    IUGenParameter getParameters();
-
-    IUGenConnection[] getInputs();
+    IUGenParameter[] getParameters();
 
     String getName();
-
-    int numOutputs();
-
-    int numInputs();
 
     String getDoc();
 

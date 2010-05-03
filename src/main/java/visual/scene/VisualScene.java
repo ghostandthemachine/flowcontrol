@@ -331,9 +331,7 @@ public class VisualScene extends GraphScene {
         connection.setSourceAnchor(AnchorFactory.createCircularAnchor(src, 2));
         connection.setTargetAnchor(AnchorFactory.createCircularAnchor(tgt, 2));
         addEdge(connection);
-        //create data connection
-//        dataScene.connect(source.getDataNode(), sourcePort, target.getDataNode(), targetPort);
-        //save one for each so that they connections can be accessed in both directions
+
         connections.add(new Connection(source, sourcePort, target, targetPort, connection));
     }
 
@@ -347,9 +345,7 @@ public class VisualScene extends GraphScene {
         connection.setSourceAnchor(AnchorFactory.createCircularAnchor(src, 2));
         connection.setTargetAnchor(AnchorFactory.createCircularAnchor(tgt, 2));
         addEdge(connection);
-        //create data connection
-//        dataScene.connect(source.getDataNode(), sourcePort, target.getDataNode(), targetPort);
-        //save one for each so that they connections can be accessed in both directions
+
         connections.add(new Connection(source, sourcePort, target, targetPort, connection));
     }
 
@@ -380,8 +376,6 @@ public class VisualScene extends GraphScene {
             Connection connection = (Connection) i.next();
             if (connection.getSource() == node || connection.getTarget() == node) {
                 toRemove.add(connection);
-                //if the data scene has any connections using this node, remove them
-//                dataScene.removeConnection(dataScene.getConnections(node.getDataNode()));
                 this.removeEdge(connection.getConnectionWidget());
             }
         }
@@ -419,7 +413,7 @@ public class VisualScene extends GraphScene {
 
     private void routeSelectedEdges() {
         Object[] selectedObjects = this.getSelectedObjects().toArray();
-        ConnectionWidget conn = new ConnectionWidget(this.getScene());
+        CustomConnectionWidget conn = new CustomConnectionWidget(this.getScene());
         for (int i = 0; i < selectedObjects.length; i++) {
             if (selectedObjects[i].getClass() == conn.getClass()) {
                 ConnectionWidget connection = (ConnectionWidget) selectedObjects[i];
@@ -430,7 +424,7 @@ public class VisualScene extends GraphScene {
 
     private void unrouteSelectedEdges() {
         Object[] selectedObjects = this.getSelectedObjects().toArray();
-        ConnectionWidget conn = new ConnectionWidget(this.getScene());
+        CustomConnectionWidget conn = new CustomConnectionWidget(this.getScene());
         for (int i = 0; i < selectedObjects.length; i++) {
             if (selectedObjects[i].getClass() == conn.getClass()) {
                 ConnectionWidget connection = (ConnectionWidget) selectedObjects[i];

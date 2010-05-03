@@ -68,14 +68,14 @@ public class PortBorder extends Widget implements Border {
 
     private void revalidatePorts() {
         float inputWidth = 0;
-        if (node.getNumInputs() >= 1) {
+        if (node.getNumInputs() > 1) {
             inputWidth = portArea / (node.getNumInputs() - 1);
         } else {
             inputWidth = 10;
         }
 
         float outputWidth = 0;
-        if (node.getNumOutputs() >= 1) {
+        if (node.getNumOutputs() > 1) {
             outputWidth = portArea / (node.getNumOutputs() - 1);
         } else {
             outputWidth = 10;

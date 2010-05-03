@@ -45,9 +45,8 @@ public class TestUGen implements IUGen {
 
     public TestUGen(IUGenInfo info) {
         this.name = info.getName();
-        this.rate = info.getRate();
-        this.nInputs = info.numInputs();
-        this.nOutputs = info.numOutputs();
+        this.nInputs = info.getParameters().length;
+        this.nOutputs = 1;
 
         params = new TestUGenParameter(name, defaultValue);
     }

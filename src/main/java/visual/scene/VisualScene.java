@@ -641,9 +641,8 @@ public class VisualScene extends GraphScene {
                 if (event.getKeyCode() == KeyEvent.VK_UP) {
                     for (Iterator i = array.iterator(); i.hasNext();) {
                         try {
-                            VisualNode node = (VisualNode) i.next();
+                            BorderPortTestNode node = (BorderPortTestNode) i.next();
                             node.setPreferredLocation(new Point(node.getPreferredLocation().x, node.getPreferredLocation().y - 2));
-                            System.out.println("up");
                         } catch (java.lang.ClassCastException e) {
                         }
                     }
@@ -652,8 +651,7 @@ public class VisualScene extends GraphScene {
                 if (event.getKeyCode() == KeyEvent.VK_DOWN) {
                     for (Iterator i = array.iterator(); i.hasNext();) {
                         try {
-                            VisualNode node = (VisualNode) i.next();
-                            System.out.println("down");
+                            BorderPortTestNode node = (BorderPortTestNode) i.next();
                             node.setPreferredLocation(new Point(node.getPreferredLocation().x, node.getPreferredLocation().y + 2));
                         } catch (java.lang.ClassCastException e) {
                         }
@@ -663,8 +661,7 @@ public class VisualScene extends GraphScene {
                 if (event.getKeyCode() == KeyEvent.VK_LEFT) {
                     for (Iterator i = array.iterator(); i.hasNext();) {
                         try {
-                            VisualNode node = (VisualNode) i.next();
-                            System.out.println("left");
+                            BorderPortTestNode node = (BorderPortTestNode) i.next();
                             node.setPreferredLocation(new Point(node.getPreferredLocation().x - 2, node.getPreferredLocation().y));
                         } catch (java.lang.ClassCastException e) {
                         }
@@ -674,8 +671,7 @@ public class VisualScene extends GraphScene {
                 if (event.getKeyCode() == KeyEvent.VK_RIGHT) {
                     for (Iterator i = array.iterator(); i.hasNext();) {
                         try {
-                            VisualNode node = (VisualNode) i.next();
-                            System.out.println("right");
+                            BorderPortTestNode node = (BorderPortTestNode) i.next();
                             node.setPreferredLocation(new Point(node.getPreferredLocation().x + 2, node.getPreferredLocation().y));
                         } catch (java.lang.ClassCastException e) {
                         }

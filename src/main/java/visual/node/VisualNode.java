@@ -234,7 +234,7 @@ public class VisualNode extends Widget {
 //            inputPorts.setSapcing((int) (50 / (numInputs * 6)));
 //        }
 
-        visualScene.getScene().addNode(this);
+        visualScene.getScene().addChild(this);
     }
 
     public Widget getLabelWidget() {

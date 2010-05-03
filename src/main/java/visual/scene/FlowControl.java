@@ -19,7 +19,7 @@ import overtoneinterface.TestUGenInfo;
  */
 public class FlowControl extends JPanel {
 
-    Collection<IUGenInfo> info = new ArrayList<IUGenInfo>();
+    IUGenInfo[] info;
     VisualScene scene = new VisualScene();
 
     public FlowControl() {
@@ -29,17 +29,18 @@ public class FlowControl extends JPanel {
         TestUGenInfo ugen1 = new TestUGenInfo("shitty", 500, 3, 1);
         TestUGenInfo ugen2 = new TestUGenInfo("addition", 500, 8, 2);
         TestUGenInfo ugen3 = new TestUGenInfo("add", 500, 2, 4);
-        info.add(ugen0);
-        info.add(ugen1);
-        info.add(ugen2);
-        info.add(ugen3);
+        info = new IUGenInfo[4];
+        info[0] = (ugen0);
+        info[1] = (ugen1);
+        info[2] = (ugen2);
+        info[3] = (ugen3);
 
 
         initComponents();
 
     }
 
-    public FlowControl(Collection<IUGenInfo> info) {
+    public FlowControl(IUGenInfo[] info) {
         this.info = info;
         initComponents();
     }
@@ -58,7 +59,11 @@ public class FlowControl extends JPanel {
         add(scene.createSatelliteView(), BorderLayout.WEST);
     }
 
-    public void loadIUGenLibrary(Collection<IUGenInfo> collection) {
-        scene.addIUGenInfo(collection);
+    public void loadIUGenLibrary(IUGenInfo[] collection) {
+        ArrayList<IUGenInfo> array = new ArrayList<IUGenInfo>();
+        for(int i = 0; i < collection.length; i++){
+            array.add(collection[i]);
+        }
+        scene.addIUGenInfo(array);
     }
 }

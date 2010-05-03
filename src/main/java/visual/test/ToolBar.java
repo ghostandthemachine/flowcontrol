@@ -4,18 +4,16 @@
  */
 package visual.test;
 
+import GroupNode.BorderPortTestNode;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import org.openide.util.ImageUtilities;
-import visual.node.VisualNode;
-import visual.scene.VisualScene;
 import visual.scene.VisualScene;
 
 /**
@@ -26,11 +24,11 @@ public class ToolBar extends JToolBar {
 
     public static String EDIT_MODE = "editMode";
     public static String ALIGN_MODE = "alignMode";
-    private VisualScene modelScene;
+    private VisualScene visualScene;
     private JPanel parentPanel;
 
     public ToolBar(VisualScene s, JPanel p) {
-        modelScene = s;
+        visualScene = s;
         parentPanel = p;
         addButtons();
         this.setMargin(new Insets(3, 3, -3, 0));
@@ -44,7 +42,7 @@ public class ToolBar extends JToolBar {
         button.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent ae) {
-                modelScene.setEditMode();
+                visualScene.setEditMode();
             }
         });
         add(button);
@@ -54,7 +52,7 @@ public class ToolBar extends JToolBar {
         button.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent ae) {
-                modelScene.setAlignMode();
+                visualScene.setAlignMode();
             }
         });
         add(button);
@@ -64,10 +62,10 @@ public class ToolBar extends JToolBar {
         button.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent ae) {
-                VisualNode node = new VisualNode(modelScene.getModelScene());
+                BorderPortTestNode node = new BorderPortTestNode((VisualScene) visualScene.getScene());
                 node.setPreferredLocation(new Point(400, 400));
-                modelScene.addNode(node);
-                System.out.println(modelScene.getFocusedWidget());
+                visualScene.addNode(node);
+                System.out.println((VisualScene) visualScene.getFocusedWidget());
                 parentPanel.grabFocus();
             }
         });
@@ -84,7 +82,7 @@ public class ToolBar extends JToolBar {
         button.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent ae) {
-                parentPanel.remove(modelScene.createSatelliteView());
+                parentPanel.remove(visualScene.createSatelliteView());
                 parentPanel.grabFocus();
             }
         });

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import visual.scene.VisualScene;
 import org.netbeans.api.visual.layout.LayoutFactory;
 import org.netbeans.api.visual.widget.Widget;
-import visual.node.Port;
 import visual.test.Tools;
 
 /**

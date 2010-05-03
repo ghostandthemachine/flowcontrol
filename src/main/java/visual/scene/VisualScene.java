@@ -43,6 +43,7 @@ import org.netbeans.api.visual.widget.Widget;
 import org.netbeans.api.visual.widget.general.IconNodeWidget;
 import overtoneinterface.IUGenInfo;
 import trie.Trie;
+import visual.node.CustomConnectionWidget;
 import visual.node.CustomRouterFactory;
 import visual.node.FlowControlPointShape;
 
@@ -104,10 +105,6 @@ public class VisualScene extends GraphScene {
         getActions().addAction(ActionFactory.createRectangularSelectAction(this, backgroundLayer));
 
         getPriorActions().addAction(new KeyEventAction());  //add the scene key event listener
-
-        BorderPortTestNode gnode = new BorderPortTestNode(this);
-        gnode.setPreferredLocation(new Point(100, 100));
-        this.addChild(gnode);
     }
 
     public Trie getTrie() {
@@ -184,10 +181,6 @@ public class VisualScene extends GraphScene {
 
     public DataScene getDataScene() {
         return dataScene;
-    }
-
-    public VisualScene getModelScene() {
-        return this;
     }
 
     /**
@@ -293,7 +286,7 @@ public class VisualScene extends GraphScene {
     @Override
     protected Widget attachEdgeWidget(Object e) {
         //create the visual connection
-        ConnectionWidget connection = (ConnectionWidget) e;
+        CustomConnectionWidget connection = (CustomConnectionWidget) e;
         connection.setPaintControlPoints(true);
         connection.setRouter(CustomRouterFactory.createFreeRouter());
         connection.setControlPointShape(FlowControlPointShape.CIRCLE_FILLED_SMALL);
@@ -308,11 +301,11 @@ public class VisualScene extends GraphScene {
         connectionLayer.addChild(connection);
 
         //create the data connection
-        Port srcPort = (Port) connection.getSourceAnchor().getRelatedWidget().getParentWidget();
-        VisualNode src = srcPort.getParentNode();
-
-        Port tgtPort = (Port) connection.getTargetAnchor().getRelatedWidget().getParentWidget();
-        VisualNode tgt = tgtPort.getParentNode();
+//        Port srcPort = (Port) connection.getSourceAnchor().getRelatedWidget().getParentWidget();
+//        VisualNode src = srcPort.getParentNode();
+//
+//        Port tgtPort = (Port) connection.getTargetAnchor().getRelatedWidget().getParentWidget();
+//        VisualNode tgt = tgtPort.getParentNode();
 
 //        dataScene.connect(src.getDataNode(), srcPort.getID(), tgt.getDataNode(), tgtPort.getID());
 
@@ -332,7 +325,7 @@ public class VisualScene extends GraphScene {
     }
 
     private void connect(VisualNode source, int sourcePort, VisualNode target, int targetPort) {
-        ConnectionWidget connection = new ConnectionWidget(this);
+        CustomConnectionWidget connection = new CustomConnectionWidget(this);
         Widget src = source.getOutputPort(sourcePort);
         Widget tgt = target.getInputPort(targetPort);
         connection.setSourceAnchor(AnchorFactory.createCircularAnchor(src, 2));
@@ -348,7 +341,7 @@ public class VisualScene extends GraphScene {
      * for use with CustomBorderPort testing
      */
     private void connect(BorderPortTestNode source, int sourcePort, BorderPortTestNode target, int targetPort) {
-        ConnectionWidget connection = new ConnectionWidget(this);
+        CustomConnectionWidget connection = new CustomConnectionWidget(this);
         Widget src = source.getOutputPort(sourcePort);
         Widget tgt = target.getInputPort(targetPort);
         connection.setSourceAnchor(AnchorFactory.createCircularAnchor(src, 2));
@@ -361,7 +354,7 @@ public class VisualScene extends GraphScene {
     }
 
     public void connect(CustomPortInteractor source, CustomPortInteractor target) {
-        ConnectionWidget connection = new ConnectionWidget(this);
+        CustomConnectionWidget connection = new CustomConnectionWidget(this);
         connection.setSourceAnchor(AnchorFactory.createCircularAnchor(source, 1));
         connection.setTargetAnchor(AnchorFactory.createCircularAnchor(target, 1));
 
@@ -371,7 +364,7 @@ public class VisualScene extends GraphScene {
     }
 
     public void connect(PortInteractor source, PortInteractor target) {
-        ConnectionWidget connection = new ConnectionWidget(this);
+        CustomConnectionWidget connection = new CustomConnectionWidget(this);
         connection.setSourceAnchor(AnchorFactory.createCircularAnchor(source, 1));
         connection.setTargetAnchor(AnchorFactory.createCircularAnchor(target, 1));
 
@@ -426,7 +419,7 @@ public class VisualScene extends GraphScene {
 
     private void routeSelectedEdges() {
         Object[] selectedObjects = this.getSelectedObjects().toArray();
-        ConnectionWidget conn = new ConnectionWidget(this.getModelScene());
+        ConnectionWidget conn = new ConnectionWidget(this.getScene());
         for (int i = 0; i < selectedObjects.length; i++) {
             if (selectedObjects[i].getClass() == conn.getClass()) {
                 ConnectionWidget connection = (ConnectionWidget) selectedObjects[i];
@@ -437,7 +430,7 @@ public class VisualScene extends GraphScene {
 
     private void unrouteSelectedEdges() {
         Object[] selectedObjects = this.getSelectedObjects().toArray();
-        ConnectionWidget conn = new ConnectionWidget(this.getModelScene());
+        ConnectionWidget conn = new ConnectionWidget(this.getScene());
         for (int i = 0; i < selectedObjects.length; i++) {
             if (selectedObjects[i].getClass() == conn.getClass()) {
                 ConnectionWidget connection = (ConnectionWidget) selectedObjects[i];
@@ -610,7 +603,7 @@ public class VisualScene extends GraphScene {
             VisualScene scene = (VisualScene) widget;
             System.out.println(event.getModifiers());
             if (event.getKeyCode() == KeyEvent.VK_N) {      //type 'n' to create a new object
-                VisualNode node = new VisualNode(scene.getModelScene());
+                BorderPortTestNode node = new BorderPortTestNode(scene.getVisualScene());
                 node.setPreferredLocation(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
                 scene.setLastPointCreatedAt(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
                 scene.addNode(node);
@@ -618,10 +611,10 @@ public class VisualScene extends GraphScene {
             }
 
             if (event.getKeyCode() == KeyEvent.VK_F) {      //type 'f' to create a new object
-                VisualNode node = new FloatDisplay(scene.getModelScene(), scene.getDataScene());
-                node.setPreferredLocation(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
-                scene.setLastPointCreatedAt(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
-                scene.addNode(node);
+//                VisualNode node = new FloatDisplay(scene.getScene(), scene.getDataScene());
+//                node.setPreferredLocation(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
+//                scene.setLastPointCreatedAt(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
+//                scene.addNode(node);
             }
 
             if (event.isAltDown() && event.getKeyCode() == KeyEvent.VK_A) {    //alt + 'a' for align mode toggle
@@ -725,7 +718,7 @@ public class VisualScene extends GraphScene {
             if (widget != null) {
                 widget.setBackground(scene.getLookFeel().getBackground(ObjectState.createNormal()));
                 widget.setForeground(new Color(0, 0, 0, 0));
-                PortInteractor port = (PortInteractor) widget;
+                CustomPortInteractor port = (CustomPortInteractor) widget;
                 port.setOver(false);
             }
         }
@@ -736,7 +729,7 @@ public class VisualScene extends GraphScene {
                 ObjectState state = ObjectState.createNormal().deriveSelected(true);
                 widget.setBackground(scene.getLookFeel().getBackground(state));
                 widget.setForeground(Color.yellow);
-                PortInteractor port = (PortInteractor) widget;
+                CustomPortInteractor port = (CustomPortInteractor) widget;
                 port.setOver(true);
             }
         }

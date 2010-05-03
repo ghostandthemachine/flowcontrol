@@ -81,6 +81,8 @@ public class CustomPort extends Widget {
 
     public void setSize(int size) {
         this.size = size;
+        revalidate();
+        repaint();
     }
 
     public BorderPortTestNode getParentNode() {

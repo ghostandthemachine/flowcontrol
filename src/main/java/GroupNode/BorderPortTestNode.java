@@ -11,7 +11,12 @@ import atom.AtomFloat;
 import dataScene.DataScene;
 import data.DataNode;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import visual.scene.VisualScene;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.action.TextFieldInplaceEditor;
@@ -114,6 +119,11 @@ public class BorderPortTestNode extends Widget {
         labelWidget.setPreferredLocation(new Point(borderRadius / 2, 0));
 
         addChild(labelWidget);
+        Collection list = portBorder.getPorts();
+        for(Iterator i = list.iterator(); i.hasNext(); ) {
+            Widget widget = (Widget) i.next();
+            widget.bringToFront();
+        }
     }
 
     public void removeLabelEditor() {
@@ -202,7 +212,7 @@ public class BorderPortTestNode extends Widget {
 
         portBorder.setParameters(this);
 
-        visualScene.getModelScene().addNode(this);
+        visualScene.getScene().addChild(this);
     }
 
     public Widget getLabelWidget() {

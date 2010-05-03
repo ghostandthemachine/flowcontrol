@@ -37,6 +37,8 @@ public class CustomPortInteractor extends Widget {
     private Color highlightColor;
     private BorderPortTestNode node;
     private int portId;
+    private float strokeWidth = 3;
+    private BasicStroke stroke = new BasicStroke(strokeWidth);
 
     public CustomPortInteractor(BorderPortTestNode node, int s, CustomPortType type, int portId) {
         super(node.getScene());
@@ -63,16 +65,18 @@ public class CustomPortInteractor extends Widget {
 
     @Override
     protected Rectangle calculateClientArea() {
-        return new Rectangle(-size / 2, -size, size * 2 + 1, size * 2 + 1);
+        int tx = (size / 2);
+        tx -= 6;
+        int ty = -6;
+        return new Rectangle(tx - 1, ty - 1, 14, 14);
     }
 
     @Override
     protected void paintWidget() {
         Graphics2D g = getGraphics();
-
+        g.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER));
         //draw line
         g.setColor(Color.black);
-        g.setStroke(new BasicStroke(2f));
         g.drawLine(0, 0, size, 0);
 
         if (over) {
@@ -81,7 +85,11 @@ public class CustomPortInteractor extends Widget {
             g.setColor(new Color(0, 0, 0, 0));
         }
 
-        g.drawOval(-size / 2, -size, size * 2, size * 2);
+        g.setStroke(new BasicStroke(2f));
+        int tx = (size / 2);
+        tx -= 6;
+        int ty = -6;
+        g.drawOval(tx, ty, 12, 12);
         g.setStroke(new BasicStroke(1f));
         this.revalidate();
 
@@ -101,6 +109,10 @@ public class CustomPortInteractor extends Widget {
 
     public BorderPortTestNode getNode() {
         return node;
+    }
+
+    public void setStrokeWidth(float f) {
+        strokeWidth = f;
     }
 
     public int getPortNumber() {
@@ -158,7 +170,7 @@ public class CustomPortInteractor extends Widget {
 
         @Override
         public void createConnection(Widget sourceWidget, Widget targetWidget) {
-            parentScene.connect((CustomPortInteractor)sourceWidget, (CustomPortInteractor) targetWidget);
+            parentScene.connect((CustomPortInteractor) sourceWidget, (CustomPortInteractor) targetWidget);
         }
     }
 }

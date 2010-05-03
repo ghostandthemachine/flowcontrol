@@ -23,7 +23,20 @@ public class FlowControl extends JPanel {
     VisualScene scene = new VisualScene();
 
     public FlowControl() {
+        //
+        //create test ugens
+        TestUGenInfo ugen0 = new TestUGenInfo("test0", 500, 2, 1);
+        TestUGenInfo ugen1 = new TestUGenInfo("shitty", 500, 3, 1);
+        TestUGenInfo ugen2 = new TestUGenInfo("addition", 500, 8, 2);
+        TestUGenInfo ugen3 = new TestUGenInfo("add", 500, 2, 4);
+        info.add(ugen0);
+        info.add(ugen1);
+        info.add(ugen2);
+        info.add(ugen3);
+
+
         initComponents();
+
     }
 
     public FlowControl(Collection<IUGenInfo> info) {
@@ -32,6 +45,7 @@ public class FlowControl extends JPanel {
     }
 
     private void initComponents() {
+        loadIUGenLibrary(info);
         //Set the layout:
         setLayout(new BorderLayout());
         //Create a JScrollPane:

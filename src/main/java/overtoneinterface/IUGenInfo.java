@@ -4,19 +4,26 @@
  */
 package overtoneinterface;
 
-import compositeNodes.OvertoneNodeInfo;
-
 /**
  *
  * @author Jon
  */
-public interface IUGenInfo extends OvertoneNodeInfo {
+public interface IUGenInfo {
 
     int getRate();
 
     IUGenParameter getParameters();
 
     IUGenConnection[] getInputs();
+
+    String getName();
+
+    int numOutputs();
+
+    int numInputs();
+
+    String getDoc();
+
 }
 
 

@@ -1,10 +1,12 @@
 package visual.node;
 
+import GroupNode.CustomStroke;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import org.netbeans.api.visual.widget.ConnectionWidget;
@@ -109,7 +111,7 @@ public class CustomConnectionWidget extends ConnectionWidget {
         if (path != null) {
             Stroke previousStroke = gr.getStroke();
             gr.setPaint(getForeground());
-            gr.setStroke(getStroke());
+            gr.setStroke(new CustomStroke(new Rectangle2D.Float(0,0,5,3), 10f));
             gr.draw(path);
             gr.setStroke(previousStroke);
         }
@@ -158,11 +160,12 @@ public class CustomConnectionWidget extends ConnectionWidget {
             path = new GeneralPath();
             path.moveTo(x, y);
         } else {
-            int x1 = (int) ((x - lastPoint.getX()));
-            int y1 = (int) ((y - lastPoint.getY()));
-            int x2 = x;
-            int y2 = y;
-            path.quadTo(x1, y1, x2, y2);
+//            int x1 = (int) ((x - lastPoint.getX()));
+//            int y1 = (int) ((y - lastPoint.getY()));
+//            int x2 = x;
+//            int y2 = y;
+//            path.quadTo(x1, y1, x2, y2);
+        path.lineTo(x, y);
         }
         lastPoint = new Point(x,y);
 

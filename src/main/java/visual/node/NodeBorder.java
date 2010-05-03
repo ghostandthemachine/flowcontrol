@@ -80,6 +80,7 @@ public class NodeBorder extends Widget implements Border {
         return new Insets(insetHeight, insetWidth, insetHeight, insetWidth);
     }
 
+
     public void paint(Graphics2D gr, Rectangle bounds) {
         if (fillColor != null) {
             gr.setColor(fillColor);

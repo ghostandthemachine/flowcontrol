@@ -25,10 +25,10 @@ public class FlowControl extends JPanel {
     public FlowControl() {
         //
         //create test ugens
-        TestUGenInfo ugen0 = new TestUGenInfo("test0", 500, 2, 1);
-        TestUGenInfo ugen1 = new TestUGenInfo("shitty", 500, 3, 1);
-        TestUGenInfo ugen2 = new TestUGenInfo("addition", 500, 8, 2);
-        TestUGenInfo ugen3 = new TestUGenInfo("add", 500, 2, 4);
+        TestUGenInfo ugen0 = new TestUGenInfo("test_this", 500, 2, 1);
+        TestUGenInfo ugen1 = new TestUGenInfo("test@", 500, 3, 1);
+        TestUGenInfo ugen2 = new TestUGenInfo("-", 500, 8, 2);
+        TestUGenInfo ugen3 = new TestUGenInfo("+", 500, 2, 4);
         info = new IUGenInfo[4];
         info[0] = (ugen0);
         info[1] = (ugen1);

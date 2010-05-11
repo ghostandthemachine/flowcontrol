@@ -11,7 +11,7 @@ package overtoneinterface;
 public class TestUGenInfo implements IUGenInfo {
 
     String name;
-    TestUGenParameter[] params = new TestUGenParameter[1];
+    TestUGenParameter[] params = new TestUGenParameter[3];
     int rate;
     int nOutputs;
     int nInputs;
@@ -25,6 +25,8 @@ public class TestUGenInfo implements IUGenInfo {
 
         TestUGenParameter param = new TestUGenParameter(name, 500);
         params[0] = param;
+        params[1] = param;
+        params[2] = param;
     }
 
     @Override

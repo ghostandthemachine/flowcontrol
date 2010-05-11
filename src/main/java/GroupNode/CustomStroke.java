@@ -28,6 +28,7 @@ public class CustomStroke implements Stroke {
             this.shapes[i] = t.createTransformedShape(shapes[i]);
         }
     }
+    
 
     public Shape createStrokedShape(Shape shape) {
         GeneralPath result = new GeneralPath();
@@ -40,6 +41,7 @@ public class CustomStroke implements Stroke {
         boolean first = false;
         float next = 0;
         int currentShape = 0;
+        int currentColor = 0;
         int length = shapes.length;
 
         float factor = 1;
@@ -77,6 +79,7 @@ public class CustomStroke implements Stroke {
                             result.append(t.createTransformedShape(shapes[currentShape]), false);
                             next += advance;
                             currentShape++;
+                            currentColor = currentColor < colors.length ? currentColor++ : 0;
                             if (repeat) {
                                 currentShape %= length;
                             }

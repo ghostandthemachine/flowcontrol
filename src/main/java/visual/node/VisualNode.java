@@ -11,7 +11,6 @@ import atom.AtomFloat;
 import dataScene.DataScene;
 import data.DataNode;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 import visual.node.PortGroup.PortType;
 import visual.scene.VisualScene;
@@ -82,7 +81,7 @@ public class VisualNode extends Widget {
         editorAction = ActionFactory.createInplaceEditorAction(new LabelTextFieldEditor(this));
 
         this.setLayout(LayoutFactory.createAbsoluteLayout());
-        border  = new NodeBorder(visualScene, borderRadius, 5, 3, new Color(255, 255, 255), new Color(250, 250, 250), 3);
+        border = new NodeBorder(visualScene, borderRadius, 5, 3, new Color(255, 255, 255), new Color(250, 250, 250), 3);
 
         createLabelWidget(scene);
         createInputPorts(scene);
@@ -126,9 +125,7 @@ public class VisualNode extends Widget {
         labelWidget.getActions().addAction(editorAction);
         labelWidget.setLabel("            ");
         labelWidget.getActions().addAction(ActionFactory.createResizeAction());
-        System.out.println(labelWidget.getBounds());
         labelWidget.setPreferredLocation(new Point(borderRadius / 2, 0));
-
         addChild(labelWidget);
     }
 
@@ -337,6 +334,10 @@ public class VisualNode extends Widget {
 
     public int getNumInputs() {
         return numInputs;
+    }
+
+    public WidgetAction getInplaceEditor() {
+        return editorAction;
     }
 
     public void setMouseEvent(WidgetMouseEvent wme) {

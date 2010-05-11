@@ -36,6 +36,8 @@ public class PortBorder extends Widget implements Border {
     int width = 0;
     int height = 0;
     int area = 0;
+    int inputSpacing = 1;
+    int outputSpacing = 1;
     Point[] inputPoints;
     Point[] outputPoints;
     private int lastArea = 0;
@@ -69,17 +71,21 @@ public class PortBorder extends Widget implements Border {
     private void revalidatePorts() {
         float inputWidth = 0;
         if (node.getNumInputs() > 1) {
-            inputWidth = portArea / (node.getNumInputs() - 1);
+            inputWidth = portArea / numInputs;
         } else {
             inputWidth = 10;
         }
 
         float outputWidth = 0;
         if (node.getNumOutputs() > 1) {
-            outputWidth = portArea / (node.getNumOutputs() - 1);
+            outputWidth = portArea / (node.getNumOutputs());
         } else {
             outputWidth = 10;
         }
+
+        //local ints to store the next 0 locations
+        int itx = (int) -((14 - inputWidth) / 2);
+        int otx = (int) -((14 - outputWidth) / 2);
 
         outputWidth = Tools.constrain(outputWidth / 2, 2, 6);
         inputWidth = Tools.constrain(inputWidth / 2, 2, 6);
@@ -87,8 +93,10 @@ public class PortBorder extends Widget implements Border {
         for (int i = 0; i < inputPoints.length; i++) {
             if (i == 0) {
                 inputPoints[i] = new Point(2 + (arcWidth / 2), y);
+            } else if (i == 1) {
+                inputPoints[1] = new Point(itx/2 + (i * (portArea / node.getNumInputs())), y);
             } else {
-                inputPoints[i] = new Point( i * (portArea / node.getNumInputs()) + (2 + arcWidth / 2), y);
+                inputPoints[i] = new Point(itx + (i * ((portArea / node.getNumInputs()))) - (arcWidth / 2), y);
             }
             CustomPortInteractor port = (CustomPortInteractor) inputPorts.getPort(i);
             port.setSize((int) inputWidth);
@@ -101,7 +109,7 @@ public class PortBorder extends Widget implements Border {
             if (i == 0) {
                 outputPoints[i] = new Point(2 + arcWidth / 2, y + height);
             } else {
-                outputPoints[i] = new Point(i * (portArea / node.getNumOutputs()) + (2 + arcWidth / 2) , y + height);
+                outputPoints[i] = new Point(i * (portArea / node.getNumOutputs()) + (2 + arcWidth / 2), y + height);
             }
             CustomPortInteractor port = (CustomPortInteractor) outputPorts.getPort(i);
             port.setSize((int) outputWidth);
@@ -109,7 +117,6 @@ public class PortBorder extends Widget implements Border {
             port.repaint();
         }
 
-        System.out.println(outputWidth + "   " + inputWidth);
 
     }
 
@@ -123,20 +130,25 @@ public class PortBorder extends Widget implements Border {
         return super.calculateClientArea();
     }
 
+    /*
+     * all the paint values are being cast to int's because the setPrefferedBounds(point) method which sets
+     * the location of the PortInteractor visual nodes which are the ports. The method only takes ints, so
+     * if the border is painted with float, it doens't line up right
+     */
     public void paint(Graphics2D gr, Rectangle bounds) {
         if (fillColor != null) {
             gr.setColor(fillColor);
-            gr.fill(new RoundRectangle2D.Float(bounds.x, bounds.y, bounds.width, bounds.height, arcWidth, arcHeight));
+            gr.fill(new RoundRectangle2D.Float((int) bounds.x + 1, (int) bounds.y + 1, (int) bounds.width - 4, (int) bounds.height - 4, (int) arcWidth, (int) arcHeight));
         }
         if (drawColor != null) {
             gr.setColor(drawColor);
             gr.setStroke(new BasicStroke(thickness));
-            gr.draw(new RoundRectangle2D.Float(bounds.x + thickness / 2, bounds.y + thickness / 2, bounds.width - thickness, bounds.height - thickness, arcWidth, arcHeight));
+            gr.draw(new RoundRectangle2D.Float((int) (bounds.x + thickness / 2), (int) (bounds.y + thickness / 2), (int) (bounds.width - thickness - 2), (int) (bounds.height - thickness - 2), (int) arcWidth, (int) arcHeight));
 
             x = (int) (bounds.x + thickness / 2);
             y = (int) (bounds.y + thickness / 2);
             width = (int) (bounds.width - thickness);
-            height = (int) (bounds.height - thickness);
+            height = (int) (bounds.height - thickness) - 2;
             portArea = width - arcWidth * 2;
             lastArea = area;
             area = width * height;
@@ -147,6 +159,8 @@ public class PortBorder extends Widget implements Border {
             }
         }
     }
+
+
 
     public CustomPortGroup getOutputs() {
         return outputPorts;

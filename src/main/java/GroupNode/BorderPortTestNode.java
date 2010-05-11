@@ -111,7 +111,7 @@ public class BorderPortTestNode extends Widget {
         labelWidget.setFont(new Font("verdana", Font.BOLD, 13));
         labelWidget.getActions().addAction(editorAction);
         labelWidget.setLabel("            ");
-        portBorder = new PortBorder(this, borderRadius, 5, 3, new Color(255, 255, 255), new Color(250, 250, 250), 3);
+        portBorder = new PortBorder(this, borderRadius, 5, 5, new Color(255, 255, 255), new Color(250, 250, 250), 3);
         portBorder.setFill(Color.white);
         portBorder.setDraw(Color.gray);
         labelWidget.getActions().addAction(ActionFactory.createResizeAction());
@@ -120,7 +120,7 @@ public class BorderPortTestNode extends Widget {
 
         addChild(labelWidget);
         Collection list = portBorder.getPorts();
-        for(Iterator i = list.iterator(); i.hasNext(); ) {
+        for (Iterator i = list.iterator(); i.hasNext();) {
             Widget widget = (Widget) i.next();
             widget.bringToFront();
         }
@@ -132,6 +132,10 @@ public class BorderPortTestNode extends Widget {
 
     public UINode getUINode() {
         return null;
+    }
+
+    public WidgetAction getInplaceEditor() {
+        return editorAction;
     }
 
     public void setValue(float f) {

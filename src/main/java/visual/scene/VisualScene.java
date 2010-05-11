@@ -6,7 +6,6 @@ package visual.scene;
 
 import GroupNode.BorderPortTestNode;
 import GroupNode.CustomPortInteractor;
-import GroupNode.GroupNode;
 import org.openide.util.Exceptions;
 import trie.BadKeyException;
 import trie.NonUniqueKeyException;
@@ -21,7 +20,6 @@ import java.util.Set;
 import dataScene.DataScene;
 import java.util.Collection;
 import java.util.Iterator;
-import visual.UINodes.FloatDisplay;
 import visual.node.VisualNode;
 import visual.node.Port;
 import visual.node.PortInteractor;
@@ -44,6 +42,7 @@ import org.netbeans.api.visual.widget.general.IconNodeWidget;
 import overtoneinterface.IUGenInfo;
 import trie.Trie;
 import visual.node.CustomConnectionWidget;
+import visual.node.CustomResizeAction;
 import visual.node.CustomRouterFactory;
 import visual.node.FlowControlPointShape;
 
@@ -275,7 +274,7 @@ public class VisualScene extends GraphScene {
         widget.createActions(USE).addAction(0, dragAction);
         widget.createActions(EDIT).addAction(0, createSelectAction());
         widget.createActions(EDIT).addAction(1, multiMove);
-        widget.createActions(EDIT).addAction(2, ActionFactory.createResizeAction());
+        widget.createActions(EDIT).addAction(2, new CustomResizeAction());
         widget.createActions(EDIT).addAction(3, createObjectHoverAction());
 
         mainLayer.addChild(widget);
@@ -416,7 +415,7 @@ public class VisualScene extends GraphScene {
         CustomConnectionWidget conn = new CustomConnectionWidget(this.getScene());
         for (int i = 0; i < selectedObjects.length; i++) {
             if (selectedObjects[i].getClass() == conn.getClass()) {
-                ConnectionWidget connection = (ConnectionWidget) selectedObjects[i];
+                CustomConnectionWidget connection = (CustomConnectionWidget) selectedObjects[i];
                 connection.setRouter(CustomRouterFactory.createOrthogonalSearchRouter(mainLayer));
             }
         }
@@ -427,7 +426,7 @@ public class VisualScene extends GraphScene {
         CustomConnectionWidget conn = new CustomConnectionWidget(this.getScene());
         for (int i = 0; i < selectedObjects.length; i++) {
             if (selectedObjects[i].getClass() == conn.getClass()) {
-                ConnectionWidget connection = (ConnectionWidget) selectedObjects[i];
+                CustomConnectionWidget connection = (CustomConnectionWidget) selectedObjects[i];
                 connection.setRouter(CustomRouterFactory.createDirectRouter());
             }
         }
@@ -595,7 +594,6 @@ public class VisualScene extends GraphScene {
         @Override
         public State keyPressed(Widget widget, WidgetKeyEvent event) {
             VisualScene scene = (VisualScene) widget;
-            System.out.println(event.getModifiers());
             if (event.getKeyCode() == KeyEvent.VK_N) {      //type 'n' to create a new object
                 BorderPortTestNode node = new BorderPortTestNode(scene.getVisualScene());
                 node.setPreferredLocation(new Point((int) scene.getMouseX(), (int) scene.getMouseY()));
@@ -730,7 +728,6 @@ public class VisualScene extends GraphScene {
      * @param ugens - an array of IUGenInfo objects sent from overtone/supercollider
      */
     public void addIUGenInfo(Collection<IUGenInfo> info) {
-        System.out.println(info.size());
         if (info != null) {
             for (Iterator i = info.iterator(); i.hasNext();) {
                 try {

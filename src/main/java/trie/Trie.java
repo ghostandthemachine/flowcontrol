@@ -12,7 +12,8 @@ import java.util.*;
  */
 public final class Trie {
 
-    static final int BRANCHES = 26;
+    //All ASCII symbols from 33 to 126
+    static final int BRANCHES = 94;
     //  Information about the location of this Trie in the
     //  trie tree ;)
     int position;
@@ -45,8 +46,6 @@ public final class Trie {
 
         for (int i = 0; i < position; i++) {
             s.append(" ");
-
-
         }
         return (s.toString());
     }
@@ -125,7 +124,7 @@ public final class Trie {
     public void insert(String key, Object item) throws NonUniqueKeyException, BadKeyException {
         if (key.length() == position) {		//  this item needs to be inserted _on_ this trie
             if (at != null) {
-                throw new NonUniqueKeyException(key);
+         //       throw new NonUniqueKeyException(key);
                 
             }
             at = new TrieEntry(key, item);
@@ -323,8 +322,6 @@ public final class Trie {
         int r = negIndex(c);
         if (r == -1) {
             throw new BadKeyException(c);
-
-
         }
         return (r);
     }
@@ -335,12 +332,11 @@ public final class Trie {
      */
     public static final int negIndex(char c) {
         int r = java.lang.Character.toLowerCase(c) - 'a';
-        if (r < 0 || r > 25) {
-            return (-1);
-            
+        int rs = java.lang.Character.toLowerCase(c);
+        if (r < 0 || r > 126 - 32) {
+            return (1);
         } else {
             return (r);
-            
         }
     }
 
